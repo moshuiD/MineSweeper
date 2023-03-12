@@ -2,7 +2,7 @@
 #include<Windows.h>
 #include<stdio.h>
 #include<string>
-#ifdef DEBUG
+#ifdef _DEBUG
 #define Log(msg) Log::PrintLog(__FILE__,__LINE__,__func__,msg);
 #else
 #define Log(msg) 
@@ -25,7 +25,7 @@ namespace Log
 		return Buffer;
 	}
 
-	void PrintLog(const char* file,int line,const char* func,const char* msg) 
+	inline void PrintLog(const char* file,int line,const char* func,const char* msg)
 	{
 		string f(file);
 		SYSTEMTIME time{};

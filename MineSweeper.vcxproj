@@ -185,6 +185,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Data.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Log.hpp" />
     <ClInclude Include="Mine.h" />
@@ -206,7 +207,10 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\block1.bmp" />
+    <Image Include="res\ClientBlock.bmp" />
     <Image Include="res\MineSweeper.ico" />
+    <Image Include="res\pressSmile.bmp" />
+    <Image Include="res\smile.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

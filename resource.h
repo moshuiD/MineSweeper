@@ -7,12 +7,14 @@
 #define IDR_MAINFRAME                   128
 #define IDB_BLOCK1                      137
 #define IDR_MENU1                       138
+#define IDB_SMILE                       140
+#define IDB_PRESSSMILE                  141
+#define IDB_CLIENTBLOCK                 142
+#define IDB_CLICKBLOCK                  142
 #define IDC_BOMBAREA                    1002
 #define IDC_HEADER                      1004
-#define ID_SETTING_EASY                 32771
-#define ID_SETTING_CUSTOM               32775
-#define ID_SETTING_HARD                 32776
-#define ID_SETTING_MID                  32777
+#define IDC_MINECOUNT                   1005
+#define IDC_BUTTON1                     1006
 #define IDM_SETTING_EASY                32778
 #define IDM_SETTING_MID                 32779
 #define IDM_SETTING_HARD                32780
@@ -22,9 +24,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        140
+#define _APS_NEXT_RESOURCE_VALUE        143
 #define _APS_NEXT_COMMAND_VALUE         32782
-#define _APS_NEXT_CONTROL_VALUE         1005
+#define _APS_NEXT_CONTROL_VALUE         1007
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

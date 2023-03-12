@@ -4,6 +4,7 @@
 #include "afxdialogex.h"
 #include <thread>
 #include "Log.hpp"
+#include "Data.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -32,6 +33,7 @@ CMineSweeperDlg::~CMineSweeperDlg()
 void CMineSweeperDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_BUTTON1, m_MainButton);
 }
 
 BEGIN_MESSAGE_MAP(CMineSweeperDlg, CDialogEx)
@@ -42,6 +44,9 @@ BEGIN_MESSAGE_MAP(CMineSweeperDlg, CDialogEx)
 	ON_COMMAND(IDM_SETTING_EASY, &CMineSweeperDlg::OnSettingEasy)
 	ON_COMMAND(IDM_SETTING_HARD, &CMineSweeperDlg::OnSettingHard)
 	ON_COMMAND(IDM_SETTING_MID, &CMineSweeperDlg::OnSettingMid)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_RBUTTONDOWN()
+	ON_WM_LBUTTONUP()
 END_MESSAGE_MAP()
 
 
@@ -108,18 +113,22 @@ void CMineSweeperDlg::OnPaint()
 		RECT BombAreaRect;
 		::GetWindowRect(::GetDlgItem(m_hWnd, IDC_BOMBAREA), &BombAreaRect);
 		ScreenToClient(&BombAreaRect);
-
+		CBitmap bit;
+		bit.LoadBitmapW(IDB_SMILE);
+		m_MainButton.SetBitmap(bit);
 		CPaintDC dc(this);
 		CDC memDC;
 		memDC.CreateCompatibleDC(&dc);
 		CBitmap* pOldBmp = memDC.SelectObject(&m_UnusedBlock);
 
-		CRect rect(0, 0, bitPicSize, bitPicSize);
+		CRect rect(0, 0, Data::bitPicSize, Data::bitPicSize);
 		for (int i = 0; i < m_Mine->GetMaxX(); i++)
 		{
 			for (int j = 0; j < m_Mine->GetMaxY(); j++)
 			{
-				dc.BitBlt(BombAreaRect.left + 2 + i * bitPicSize, BombAreaRect.top + 2 + j * bitPicSize, bitPicSize, bitPicSize, &memDC, rect.left, rect.top, SRCCOPY);
+				int x = BombAreaRect.left + 2 + i * Data::bitPicSize;
+				int y = BombAreaRect.top + 2 + j * Data::bitPicSize;
+				dc.BitBlt(x, y, Data::bitPicSize, Data::bitPicSize, &memDC, rect.left, rect.top, SRCCOPY);
 			}
 		}
 
@@ -151,46 +160,111 @@ void CMineSweeperDlg::UpdateThread()
 
 void CMineSweeperDlg::AutoChangeControlSize()
 {
-	auto h = ::GetDlgItem(m_hWnd, IDC_BOMBAREA);
-	RECT BombAreaRect;
-	::GetWindowRect(h, &BombAreaRect);
-	ScreenToClient(&BombAreaRect);
-	::SetWindowPos(m_hWnd, HWND_TOPMOST, 0, 0, (BombAreaRect.left + 2) * 5 + m_Mine->GetMaxX() * bitPicSize, (m_Mine->GetMaxY() * bitPicSize) + BombAreaRect.top + 75, SWP_NOZORDER | SWP_NOMOVE);
-	auto bombArea = GetDlgItem(IDC_BOMBAREA);
-	bombArea->MoveWindow(BombAreaRect.left, BombAreaRect.top, (BombAreaRect.left + 2) + m_Mine->GetMaxX() * bitPicSize, m_Mine->GetMaxY() * bitPicSize);
+
+	auto mineArea = GetDlgItem(IDC_BOMBAREA);
+	RECT mineAreaRect;
+	mineArea->GetWindowRect(&mineAreaRect);
+	ScreenToClient(&mineAreaRect);
+	mineArea->MoveWindow(mineAreaRect.left, mineAreaRect.top, (mineAreaRect.left + 2) + m_Mine->GetMaxX() * Data::bitPicSize, m_Mine->GetMaxY() * Data::bitPicSize);
+
+	::SetWindowPos(m_hWnd, HWND_TOPMOST, 0, 0, (mineAreaRect.left + 2) * 5 + m_Mine->GetMaxX() * Data::bitPicSize, (m_Mine->GetMaxY() * Data::bitPicSize) + mineAreaRect.top + 75, SWP_NOZORDER | SWP_NOMOVE);
 
 	auto headerArea = GetDlgItem(IDC_HEADER);
 	RECT headerAreaRect;
 	headerArea->GetWindowRect(&headerAreaRect);
 	ScreenToClient(&headerAreaRect);
-	headerArea->MoveWindow(headerAreaRect.left, headerAreaRect.top, headerAreaRect.left + m_Mine->GetMaxX() * bitPicSize + 4, headerAreaRect.bottom - headerAreaRect.top);
+	headerArea->MoveWindow(headerAreaRect.left, headerAreaRect.top, headerAreaRect.left + m_Mine->GetMaxX() * Data::bitPicSize + 4, headerAreaRect.bottom - headerAreaRect.top);
 
+	auto mainButton = GetDlgItem(IDC_BUTTON1);
+	RECT mainButtonArea;
+	mainButton->GetWindowRect(&mainButtonArea);
+
+	ScreenToClient(&mainButtonArea);
+	RECT clientRect;
+	GetClientRect(&clientRect);
+	int centerX = (clientRect.right - clientRect.left) / 2;
+	int buttonWidth = mainButtonArea.right - mainButtonArea.left;
+	int left = centerX - buttonWidth / 2;
+	mainButton->MoveWindow(left, mainButtonArea.top, buttonWidth, mainButtonArea.bottom - mainButtonArea.top);
 }
 
 
 
 void CMineSweeperDlg::OnSettingCustom()
 {
-	
-}
 
+}
 
 void CMineSweeperDlg::OnSettingEasy()
 {
 	m_Mine = unique_ptr<Mine>(new Mine(9, 9, 10));
+	GetDlgItem(IDC_MINECOUNT)->SetWindowTextW(L"10");
 	SendMessage(WM_PAINT);
 }
 
 void CMineSweeperDlg::OnSettingMid()
 {
 	m_Mine = unique_ptr<Mine>(new Mine(16, 16, 40));
+	GetDlgItem(IDC_MINECOUNT)->SetWindowTextW(L"40");
 	SendMessage(WM_PAINT);
 }
 
 void CMineSweeperDlg::OnSettingHard()
 {
 	m_Mine = unique_ptr<Mine>(new Mine(32, 16, 99));
+	GetDlgItem(IDC_MINECOUNT)->SetWindowTextW(L"99");
 	SendMessage(WM_PAINT);
+}
+
+BOOL CMineSweeperDlg::PreTranslateMessage(MSG* pMsg)
+{
+
+	if (pMsg->message == WM_LBUTTONDOWN) {
+		if (pMsg->hwnd == GetDlgItem(IDC_BUTTON1)->m_hWnd) {
+			CBitmap bit;
+			bit.LoadBitmapW(IDB_PRESSSMILE);
+			m_MainButton.SetBitmap(bit);
+			bit.DeleteObject();
+		}
+	}
+
+	if (pMsg->message == WM_LBUTTONUP) {
+		if (pMsg->hwnd == GetDlgItem(IDC_BUTTON1)->m_hWnd) {
+			CBitmap bit;
+			bit.LoadBitmapW(IDB_SMILE);
+			m_MainButton.SetBitmap(bit);
+			bit.DeleteObject();
+		}
+	}
+	return CDialog::PreTranslateMessage(pMsg);
+}
+
+void CMineSweeperDlg::OnLButtonDown(UINT nFlags, CPoint point)
+{
+
+	CBitmap bit;
+	bit.LoadBitmapW(IDB_CLICKBLOCK);
+	m_MainButton.SetBitmap(bit);
+	bit.DeleteObject();
+	CDialogEx::OnLButtonDown(nFlags, point);
+}
+
+void CMineSweeperDlg::OnLButtonUp(UINT nFlags, CPoint point)
+{
+
+	CBitmap bit;
+	bit.LoadBitmapW(IDB_SMILE);
+	m_MainButton.SetBitmap(bit);
+	bit.DeleteObject();
+	CDialogEx::OnLButtonUp(nFlags, point);
+}
+
+
+void CMineSweeperDlg::OnRButtonDown(UINT nFlags, CPoint point)
+{
+
+
+	CDialogEx::OnRButtonDown(nFlags, point);
 }
 
 

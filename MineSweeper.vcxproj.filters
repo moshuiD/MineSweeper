@@ -36,6 +36,9 @@
     <ClInclude Include="Mine.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Data.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MineSweeper.cpp">
@@ -63,6 +66,15 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="res\block1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\smile.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\pressSmile.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\ClientBlock.bmp">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

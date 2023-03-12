@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <memory>
 #include "Mine.h"
+
 class CMineSweeperDlg : public CDialogEx
 {
 	template<class T>
@@ -36,7 +37,6 @@ protected:
 
 private:
 	void UpdateThread();
-	const int bitPicSize = 28;
 	void AutoChangeControlSize();
 	unique_ptr<Mine> m_Mine;
 public:
@@ -44,4 +44,11 @@ public:
 	afx_msg void OnSettingEasy();
 	afx_msg void OnSettingHard();
 	afx_msg void OnSettingMid();
+private:
+	CButton m_MainButton;
+	BOOL PreTranslateMessage(MSG* pMsg);
+public:
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 };
