@@ -8,6 +8,7 @@
 #define IDB_BLOCK1                      137
 #define IDR_MENU1                       138
 #define IDC_BOMBAREA                    1002
+#define IDC_HEADER                      1004
 #define ID_SETTING_EASY                 32771
 #define ID_SETTING_CUSTOM               32775
 #define ID_SETTING_HARD                 32776
@@ -23,7 +24,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         32782
-#define _APS_NEXT_CONTROL_VALUE         1004
+#define _APS_NEXT_CONTROL_VALUE         1005
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

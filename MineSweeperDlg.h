@@ -38,4 +38,9 @@ protected:
 private:
 	void UpdateThread();
 	const int bitPicSize = 28;
+public:
+	afx_msg void OnSettingCustom();
+	afx_msg void OnSettingEasy();
+	afx_msg void OnSettingHard();
+	afx_msg void OnSettingMid();
 };

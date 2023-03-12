@@ -185,6 +185,7 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="Log.hpp" />
+    <ClInclude Include="Mine.h" />
     <ClInclude Include="MineSweeper.h" />
     <ClInclude Include="MineSweeperDlg.h" />
     <ClInclude Include="pch.h" />
@@ -192,6 +193,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Mine.cpp" />
     <ClCompile Include="MineSweeper.cpp" />
     <ClCompile Include="MineSweeperDlg.cpp" />
     <ClCompile Include="pch.cpp">

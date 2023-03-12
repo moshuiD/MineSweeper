@@ -38,6 +38,10 @@ BEGIN_MESSAGE_MAP(CMineSweeperDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_COMMAND(IDM_SETTING_CUSTOM, &CMineSweeperDlg::OnSettingCustom)
+	ON_COMMAND(IDM_SETTING_EASY, &CMineSweeperDlg::OnSettingEasy)
+	ON_COMMAND(IDM_SETTING_HARD, &CMineSweeperDlg::OnSettingHard)
+	ON_COMMAND(IDM_SETTING_MID, &CMineSweeperDlg::OnSettingMid)
 END_MESSAGE_MAP()
 
 
@@ -103,9 +107,10 @@ void CMineSweeperDlg::OnPaint()
 		RECT r;
 		::GetWindowRect(h, &r);
 		ScreenToClient(&r);
-		//::SetWindowPos(m_hWnd, HWND_TOPMOST, 0, 0, (r.left + 2) * 5 + 9 * bitPicSize, (9 * bitPicSize)+r.top*2, SWP_NOZORDER | SWP_NOMOVE);
+		::SetWindowPos(m_hWnd, HWND_TOPMOST, 0, 0, (r.left + 2) * 5 + 9 * bitPicSize, (9 * bitPicSize)+r.top+80, SWP_NOZORDER | SWP_NOMOVE);
 		auto bombArea = GetDlgItem(IDC_BOMBAREA);
 		bombArea->MoveWindow(r.left, r.top, (r.left + 2) + 9 * bitPicSize, 9 * bitPicSize);
+		auto header = GetDlgItem(IDC_HEADER);
 		CPaintDC dc(this);
 
 		CDC memDC;
@@ -147,3 +152,27 @@ void CMineSweeperDlg::UpdateThread()
 	}
 }
 
+
+
+void CMineSweeperDlg::OnSettingCustom()
+{
+	// TODO: 在此添加命令处理程序代码
+}
+
+
+void CMineSweeperDlg::OnSettingEasy()
+{
+	// TODO: 在此添加命令处理程序代码
+}
+
+
+void CMineSweeperDlg::OnSettingHard()
+{
+	// TODO: 在此添加命令处理程序代码
+}
+
+
+void CMineSweeperDlg::OnSettingMid()
+{
+	// TODO: 在此添加命令处理程序代码
+}

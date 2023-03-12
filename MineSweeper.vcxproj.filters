@@ -36,6 +36,9 @@
     <ClInclude Include="Log.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Mine.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MineSweeper.cpp">
@@ -45,6 +48,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Mine.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
