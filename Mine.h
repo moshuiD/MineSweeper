@@ -1,6 +1,12 @@
 #pragma once
 #include<utility>
 #include<map>
+#ifdef _DEBUG
+#define INLINE inline
+#else
+#define INLINE __forceinline
+#endif 
+
 class Mine
 {
 private:
@@ -16,9 +22,9 @@ private:
 		HaveEight = 8,
 		HaveNine = 9,
 
-		BlockBeInited= 0x0F,
-		BlockNoMine= 0x40,
-		BlockHaveMine= 0x8F,
+		BlockBeInited = 0x0F,
+		BlockNoMine = 0x40,
+		BlockHaveMine = 0x8F,
 	};
 
 public:
@@ -31,9 +37,16 @@ public:
 
 	};
 	~Mine();
+
+
 private:
 	const int m_MaxX;
 	const int m_MaxY;
 	const int m_MineCount;
+
+public:
+	INLINE int GetMaxX() const { return m_MaxX; };
+	INLINE int GetMaxY() const { return m_MaxY; };
+	INLINE int GetMaxCount() const {return m_MineCount;};
 };
 

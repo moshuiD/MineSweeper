@@ -1,27 +1,26 @@
-﻿
-// MineSweeperDlg.h: 头文件
-//
-
-#pragma once
-
-
-// CMineSweeperDlg 对话框
+﻿#pragma once
+#include <memory>
+#include "Mine.h"
 class CMineSweeperDlg : public CDialogEx
 {
-// 构造
+	template<class T>
+	using shared_ptr = std::shared_ptr<T>;
+	template<class T>
+	using unique_ptr = std::unique_ptr<T>;
+	// 构造
 public:
 	CMineSweeperDlg(CWnd* pParent = nullptr);	// 标准构造函数
 	~CMineSweeperDlg();
-// 对话框数据
+	// 对话框数据
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_MINESWEEPER_DIALOG };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
 
-// 实现
+	// 实现
 protected:
 	HICON m_hIcon;
 	CBitmap m_UnusedBlock;
@@ -38,6 +37,8 @@ protected:
 private:
 	void UpdateThread();
 	const int bitPicSize = 28;
+	void AutoChangeControlSize();
+	unique_ptr<Mine> m_Mine;
 public:
 	afx_msg void OnSettingCustom();
 	afx_msg void OnSettingEasy();

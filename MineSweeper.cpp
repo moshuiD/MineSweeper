@@ -1,9 +1,4 @@
-﻿
-// MineSweeper.cpp: 定义应用程序的类行为。
-//
-
-#include "pch.h"
-#include "framework.h"
+﻿#include "framework.h"
 #include "MineSweeper.h"
 #include "MineSweeperDlg.h"
 

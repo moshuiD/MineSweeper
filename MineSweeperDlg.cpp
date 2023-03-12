@@ -1,10 +1,9 @@
-﻿#include "pch.h"
-#include "framework.h"
+﻿#include "framework.h"
 #include "MineSweeper.h"
 #include "MineSweeperDlg.h"
 #include "afxdialogex.h"
-#include<thread>
-#include"Log.hpp"
+#include <thread>
+#include "Log.hpp"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -18,6 +17,7 @@ CMineSweeperDlg::CMineSweeperDlg(CWnd* pParent /*=nullptr*/)
 	FILE* f;
 	freopen_s(&f, "CONOUT$", "w", stdout);
 #endif
+	m_Mine = unique_ptr<Mine>(new Mine(9, 9, 10));
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_UnusedBlock.LoadBitmapW(IDB_BLOCK1);
 	std::thread t([this] {UpdateThread(); });
@@ -103,26 +103,23 @@ void CMineSweeperDlg::OnPaint()
 	}
 	else
 	{
-		auto h = ::GetDlgItem(m_hWnd, IDC_BOMBAREA);
-		RECT r;
-		::GetWindowRect(h, &r);
-		ScreenToClient(&r);
-		::SetWindowPos(m_hWnd, HWND_TOPMOST, 0, 0, (r.left + 2) * 5 + 9 * bitPicSize, (9 * bitPicSize)+r.top+80, SWP_NOZORDER | SWP_NOMOVE);
-		auto bombArea = GetDlgItem(IDC_BOMBAREA);
-		bombArea->MoveWindow(r.left, r.top, (r.left + 2) + 9 * bitPicSize, 9 * bitPicSize);
-		auto header = GetDlgItem(IDC_HEADER);
-		CPaintDC dc(this);
+		AutoChangeControlSize();
 
+		RECT BombAreaRect;
+		::GetWindowRect(::GetDlgItem(m_hWnd, IDC_BOMBAREA), &BombAreaRect);
+		ScreenToClient(&BombAreaRect);
+
+		CPaintDC dc(this);
 		CDC memDC;
 		memDC.CreateCompatibleDC(&dc);
 		CBitmap* pOldBmp = memDC.SelectObject(&m_UnusedBlock);
 
 		CRect rect(0, 0, bitPicSize, bitPicSize);
-		for (int i = 0; i < 9; i++)
+		for (int i = 0; i < m_Mine->GetMaxX(); i++)
 		{
-			for (int j = 0; j < 9; j++)
+			for (int j = 0; j < m_Mine->GetMaxY(); j++)
 			{
-				dc.BitBlt(r.left + 2 + i * bitPicSize, r.top + 2 + j * bitPicSize, bitPicSize, bitPicSize, &memDC, rect.left, rect.top, SRCCOPY);
+				dc.BitBlt(BombAreaRect.left + 2 + i * bitPicSize, BombAreaRect.top + 2 + j * bitPicSize, bitPicSize, bitPicSize, &memDC, rect.left, rect.top, SRCCOPY);
 			}
 		}
 
@@ -152,27 +149,48 @@ void CMineSweeperDlg::UpdateThread()
 	}
 }
 
+void CMineSweeperDlg::AutoChangeControlSize()
+{
+	auto h = ::GetDlgItem(m_hWnd, IDC_BOMBAREA);
+	RECT BombAreaRect;
+	::GetWindowRect(h, &BombAreaRect);
+	ScreenToClient(&BombAreaRect);
+	::SetWindowPos(m_hWnd, HWND_TOPMOST, 0, 0, (BombAreaRect.left + 2) * 5 + m_Mine->GetMaxX() * bitPicSize, (m_Mine->GetMaxY() * bitPicSize) + BombAreaRect.top + 75, SWP_NOZORDER | SWP_NOMOVE);
+	auto bombArea = GetDlgItem(IDC_BOMBAREA);
+	bombArea->MoveWindow(BombAreaRect.left, BombAreaRect.top, (BombAreaRect.left + 2) + m_Mine->GetMaxX() * bitPicSize, m_Mine->GetMaxY() * bitPicSize);
+
+	auto headerArea = GetDlgItem(IDC_HEADER);
+	RECT headerAreaRect;
+	headerArea->GetWindowRect(&headerAreaRect);
+	ScreenToClient(&headerAreaRect);
+	headerArea->MoveWindow(headerAreaRect.left, headerAreaRect.top, headerAreaRect.left + m_Mine->GetMaxX() * bitPicSize + 4, headerAreaRect.bottom - headerAreaRect.top);
+
+}
+
 
 
 void CMineSweeperDlg::OnSettingCustom()
 {
-	// TODO: 在此添加命令处理程序代码
+	
 }
 
 
 void CMineSweeperDlg::OnSettingEasy()
 {
-	// TODO: 在此添加命令处理程序代码
+	m_Mine = unique_ptr<Mine>(new Mine(9, 9, 10));
+	SendMessage(WM_PAINT);
 }
-
-
-void CMineSweeperDlg::OnSettingHard()
-{
-	// TODO: 在此添加命令处理程序代码
-}
-
 
 void CMineSweeperDlg::OnSettingMid()
 {
-	// TODO: 在此添加命令处理程序代码
+	m_Mine = unique_ptr<Mine>(new Mine(16, 16, 40));
+	SendMessage(WM_PAINT);
 }
+
+void CMineSweeperDlg::OnSettingHard()
+{
+	m_Mine = unique_ptr<Mine>(new Mine(32, 16, 99));
+	SendMessage(WM_PAINT);
+}
+
+
