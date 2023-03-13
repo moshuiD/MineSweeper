@@ -1,5 +1,5 @@
 #include "Mine.h"
-
+#include "Data.h"
 void Mine::SetMine()
 {
 	for (int i = 0; i < m_MaxX; i++)
@@ -27,5 +27,28 @@ void Mine::SetMine()
 Mine::~Mine()
 {
 }
+
+Mine::pair<bool, Mine::MinePos> Mine::GetBeClickedMine(const pair<int, int>& clickPoint) const
+{
+	std::unique_lock lock(m_DisplayMineMapMutex,std::defer_lock);
+	using Data::bitPicSize;
+	lock.lock();
+	auto iter = std::find_if(m_DisplayMineMap.begin(), m_DisplayMineMap.end(), [&](const pair<pair<int,int>,MinePos>& v1)->bool {
+		if (clickPoint.first > v1.first.first && clickPoint.first < (v1.first.first + bitPicSize)) {
+			if (clickPoint.second > v1.first.second && clickPoint.second < (v1.first.second + bitPicSize)) {
+				return true;
+			}
+		}
+		return  false;
+	});
+	lock.unlock();
+	if (iter != m_DisplayMineMap.end()) {
+		return { true,iter->second };
+	}
+	else{
+		return { false,{-1,-1} };
+	}
+}
+
 
 

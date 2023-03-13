@@ -1,7 +1,8 @@
 #pragma once
 #include<utility>
-#include<map>
+#include <map>
 #include "Log.hpp"
+#include <future>
 #ifdef _DEBUG
 #define INLINE inline
 #else
@@ -11,15 +12,6 @@
 class Mine
 {
 private:
-
-	struct RangeCmp
-	{
-		/*using KeyValue = std::pair<int, int>;
-		bool operator ()(const KeyValue& p1, const KeyValue& p2) const
-		{
-			if(p1.first)
-		}*/
-	};
 
 	enum BlockState
 	{
@@ -36,15 +28,19 @@ private:
 		BlockBeInited = 0x0F,
 		BlockNoMine = 0x40,
 		BlockHaveMine = 0x8F,
-		BlockMarkMine=0x0E,     //org&0xE0 and | this
+		BlockMarkMine = 0x0E,     //org&0xE0 and | this
 
 	};
 	void SetMine();
-public:
 
-	using MinePos = std::pair<int, int>;
+public:
+	template<class Tx, class Ty>
+	using pair = std::pair<Tx, Ty>;
+	using MinePos = pair<int, int>;
 	using MineMap = std::map<MinePos, BlockState>;
-	using MineDisplayMap = std::map<std::pair<int, int>, MinePos, RangeCmp>;
+	using MineDisplayMap = std::map<pair<int, int>, MinePos>;
+	
+
 	explicit Mine(int maxX, int maxY, int mineCount) :
 		m_MaxX(maxX), m_MaxY(maxY), m_MineCount(mineCount)
 	{
@@ -59,9 +55,18 @@ private:
 	const int m_MaxY;
 	const int m_MineCount;
 	MineMap m_MineMap;
+	MineDisplayMap m_DisplayMineMap;
+	mutable std::mutex m_DisplayMineMapMutex;
 public:
 	INLINE int GetMaxX() const { return m_MaxX; };
 	INLINE int GetMaxY() const { return m_MaxY; };
-	INLINE int GetMaxCount() const {return m_MineCount;};
+	INLINE int GetMaxCount() const { return m_MineCount; };
+
+	pair<bool, MinePos> GetBeClickedMine(const pair<int, int>& clickPoint) const;
+	INLINE void AddDisplayMineMap(pair<int, int>& drawPos, MinePos& minePos) 
+	{ 
+		std::lock_guard lock(m_DisplayMineMapMutex);
+		m_DisplayMineMap.insert(std::make_pair(drawPos, minePos)); 
+	}
 };
 

@@ -128,6 +128,7 @@ void CMineSweeperDlg::OnPaint()
 			{
 				int x = BombAreaRect.left + 2 + i * Data::bitPicSize;
 				int y = BombAreaRect.top + 2 + j * Data::bitPicSize;
+				m_Mine->AddDisplayMineMap(std::make_pair(x, y), std::make_pair(i, j));
 				dc.BitBlt(x, y, Data::bitPicSize, Data::bitPicSize, &memDC, rect.left, rect.top, SRCCOPY);
 			}
 		}
@@ -256,6 +257,9 @@ void CMineSweeperDlg::OnLButtonUp(UINT nFlags, CPoint point)
 	bit.LoadBitmapW(IDB_SMILE);
 	m_MainButton.SetBitmap(bit);
 	bit.DeleteObject();
+
+	auto [isGeted, pos] = m_Mine->GetBeClickedMine({ point.x,point.y });
+	Log("x:%d y:%d", pos.first+1, pos.second+1);
 	CDialogEx::OnLButtonUp(nFlags, point);
 }
 
