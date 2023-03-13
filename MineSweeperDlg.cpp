@@ -119,6 +119,7 @@ void CMineSweeperDlg::OnPaint()
 		m_MainButton.SetBitmap(bit);
 		CPaintDC dc(this);
 		CDC memDC;
+
 		memDC.CreateCompatibleDC(&dc);
 		CBitmap* pOldBmp = memDC.SelectObject(&m_Flag);
 
@@ -132,10 +133,11 @@ void CMineSweeperDlg::OnPaint()
 				m_Mine->AddDisplayMineMap(std::make_pair(x, y), std::make_pair(i, j));
 				if ((m_Mine->GetBlockStateByPos(i, j) & 0x8F) == 0x8F) {
 					pOldBmp = memDC.SelectObject(&m_Flag);
+					Log("绘制 x:%d y:%d", i, j);
 				}
 				else
 				{
-					 pOldBmp = memDC.SelectObject(&m_UnusedBlock);
+					pOldBmp = memDC.SelectObject(&m_UnusedBlock);
 				}
 				dc.BitBlt(x, y, Data::bitPicSize, Data::bitPicSize, &memDC, rect.left, rect.top, SRCCOPY);
 			}
@@ -249,6 +251,11 @@ BOOL CMineSweeperDlg::PreTranslateMessage(MSG* pMsg)
 			bit.LoadBitmapW(IDB_SMILE);
 			m_MainButton.SetBitmap(bit);
 			bit.DeleteObject();
+			int x, y, count;
+			x = m_Mine->GetMaxX();
+			y = m_Mine->GetMaxY();
+			count = m_Mine->GetMaxCount();
+			m_Mine = unique_ptr<Mine>(new Mine(x, y, count));
 		}
 	}
 	return CDialog::PreTranslateMessage(pMsg);
@@ -273,8 +280,8 @@ void CMineSweeperDlg::OnLButtonUp(UINT nFlags, CPoint point)
 	bit.DeleteObject();
 
 	auto [isGeted, pos] = m_Mine->GetBeClickedMine({ point.x,point.y });
-	
-	Log("x:%d y:%d", pos.first+1, pos.second+1);
+
+	Log("x:%d y:%d", pos.first, pos.second);
 	CDialogEx::OnLButtonUp(nFlags, point);
 }
 

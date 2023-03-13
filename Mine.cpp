@@ -2,6 +2,7 @@
 #include "Data.h"
 void Mine::SetMine()
 {
+	srand(time(nullptr));
 	for (int i = 0; i < m_MaxX; i++)
 	{
 		for (int j = 0; j < m_MaxY; j++)
