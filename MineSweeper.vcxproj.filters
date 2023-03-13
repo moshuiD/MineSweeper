@@ -77,5 +77,8 @@
     <Image Include="res\ClientBlock.bmp">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="res\marked.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

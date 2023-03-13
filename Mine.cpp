@@ -18,6 +18,7 @@ void Mine::SetMine()
 		if (m_MineMap[{t_X, t_Y}] != BlockHaveMine) {
 			m_MineMap[{t_X, t_Y}] = BlockHaveMine;
 			unUsedMine--;
+			Log("雷在 x:%d y:%d", t_X, t_Y);
 		}
 	} while (unUsedMine);
 
@@ -26,12 +27,13 @@ void Mine::SetMine()
 
 Mine::~Mine()
 {
+	Log("Mine被释放一次");
 }
 
 Mine::pair<bool, Mine::MinePos> Mine::GetBeClickedMine(const pair<int, int>& clickPoint) const
 {
-	std::unique_lock lock(m_DisplayMineMapMutex,std::defer_lock);
 	using Data::bitPicSize;
+	std::unique_lock lock(m_DisplayMineMapMutex,std::defer_lock);
 	lock.lock();
 	auto iter = std::find_if(m_DisplayMineMap.begin(), m_DisplayMineMap.end(), [&](const pair<pair<int,int>,MinePos>& v1)->bool {
 		if (clickPoint.first > v1.first.first && clickPoint.first < (v1.first.first + bitPicSize)) {

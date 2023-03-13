@@ -21,6 +21,7 @@ CMineSweeperDlg::CMineSweeperDlg(CWnd* pParent /*=nullptr*/)
 	m_Mine = unique_ptr<Mine>(new Mine(9, 9, 10));
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_UnusedBlock.LoadBitmapW(IDB_BLOCK1);
+	m_Flag.LoadBitmapW(IDB_MARKED);
 	std::thread t([this] {UpdateThread(); });
 	t.detach();
 }
@@ -119,7 +120,7 @@ void CMineSweeperDlg::OnPaint()
 		CPaintDC dc(this);
 		CDC memDC;
 		memDC.CreateCompatibleDC(&dc);
-		CBitmap* pOldBmp = memDC.SelectObject(&m_UnusedBlock);
+		CBitmap* pOldBmp = memDC.SelectObject(&m_Flag);
 
 		CRect rect(0, 0, Data::bitPicSize, Data::bitPicSize);
 		for (int i = 0; i < m_Mine->GetMaxX(); i++)
@@ -129,6 +130,13 @@ void CMineSweeperDlg::OnPaint()
 				int x = BombAreaRect.left + 2 + i * Data::bitPicSize;
 				int y = BombAreaRect.top + 2 + j * Data::bitPicSize;
 				m_Mine->AddDisplayMineMap(std::make_pair(x, y), std::make_pair(i, j));
+				if ((m_Mine->GetBlockStateByPos(i, j) & 0x8F) == 0x8F) {
+					pOldBmp = memDC.SelectObject(&m_Flag);
+				}
+				else
+				{
+					 pOldBmp = memDC.SelectObject(&m_UnusedBlock);
+				}
 				dc.BitBlt(x, y, Data::bitPicSize, Data::bitPicSize, &memDC, rect.left, rect.top, SRCCOPY);
 			}
 		}
@@ -179,7 +187,6 @@ void CMineSweeperDlg::AutoChangeControlSize()
 	auto mainButton = GetDlgItem(IDC_BUTTON1);
 	RECT mainButtonArea;
 	mainButton->GetWindowRect(&mainButtonArea);
-
 	ScreenToClient(&mainButtonArea);
 	RECT clientRect;
 	GetClientRect(&clientRect);
@@ -187,6 +194,13 @@ void CMineSweeperDlg::AutoChangeControlSize()
 	int buttonWidth = mainButtonArea.right - mainButtonArea.left;
 	int left = centerX - buttonWidth / 2;
 	mainButton->MoveWindow(left, mainButtonArea.top, buttonWidth, mainButtonArea.bottom - mainButtonArea.top);
+
+	auto displayTime = GetDlgItem(IDC_DISPLAYTIME);
+	RECT displayTimeArea;
+	displayTime->GetWindowRect(&displayTimeArea);
+	ScreenToClient(&displayTimeArea);
+	int displayWidth = displayTimeArea.right - displayTimeArea.left;
+	displayTime->MoveWindow(clientRect.right - displayWidth - 10 /*margin*/, displayTimeArea.top, displayWidth, displayTimeArea.bottom - displayTimeArea.top);
 }
 
 
@@ -259,6 +273,7 @@ void CMineSweeperDlg::OnLButtonUp(UINT nFlags, CPoint point)
 	bit.DeleteObject();
 
 	auto [isGeted, pos] = m_Mine->GetBeClickedMine({ point.x,point.y });
+	
 	Log("x:%d y:%d", pos.first+1, pos.second+1);
 	CDialogEx::OnLButtonUp(nFlags, point);
 }

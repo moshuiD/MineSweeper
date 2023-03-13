@@ -13,6 +13,10 @@ class Mine
 {
 private:
 
+
+	void SetMine();
+
+public:
 	enum BlockState
 	{
 		HaveOne = 1,
@@ -30,16 +34,14 @@ private:
 		BlockHaveMine = 0x8F,
 		BlockMarkMine = 0x0E,     //org&0xE0 and | this
 
+		Error = 0xFF,
 	};
-	void SetMine();
-
-public:
 	template<class Tx, class Ty>
 	using pair = std::pair<Tx, Ty>;
 	using MinePos = pair<int, int>;
 	using MineMap = std::map<MinePos, BlockState>;
 	using MineDisplayMap = std::map<pair<int, int>, MinePos>;
-	
+
 
 	explicit Mine(int maxX, int maxY, int mineCount) :
 		m_MaxX(maxX), m_MaxY(maxY), m_MineCount(mineCount)
@@ -57,16 +59,45 @@ private:
 	MineMap m_MineMap;
 	MineDisplayMap m_DisplayMineMap;
 	mutable std::mutex m_DisplayMineMapMutex;
+	mutable std::mutex m_MineMapMutex;
 public:
 	INLINE int GetMaxX() const { return m_MaxX; };
 	INLINE int GetMaxY() const { return m_MaxY; };
 	INLINE int GetMaxCount() const { return m_MineCount; };
 
 	pair<bool, MinePos> GetBeClickedMine(const pair<int, int>& clickPoint) const;
-	INLINE void AddDisplayMineMap(pair<int, int>& drawPos, MinePos& minePos) 
-	{ 
+	INLINE void AddDisplayMineMap(pair<int, int>& drawPos, MinePos& minePos)
+	{
 		std::lock_guard lock(m_DisplayMineMapMutex);
-		m_DisplayMineMap.insert(std::make_pair(drawPos, minePos)); 
+		m_DisplayMineMap.insert(std::make_pair(drawPos, minePos));
+	}
+
+	//template<class Pr>
+	//INLINE pair<bool, pair<MinePos, BlockState>> GetMineMapByFunc(Pr f_cmp) const
+	//{
+	//	auto it = std::find_if(m_MineMap.begin(), m_MineMap.end(), f_cmp);
+	//	if (it != m_MineMap.end()) {
+	//		return { true,{it->first,it->second} };
+	//	}
+	//	else {
+	//		return { false,{} };
+	//	}
+	//}
+
+	INLINE BlockState GetBlockStateByPos(int x, int y)const {
+		std::lock_guard lock(m_MineMapMutex);
+		auto it = std::find_if(m_MineMap.begin(), m_MineMap.end(), [&](const std::pair<std::pair<int, int>, Mine::BlockState>& v) {
+			if (v.first.first == x && v.first.second == y)
+				return true;
+			else
+				return false;
+		});
+		if (it != m_MineMap.end()) {
+			return it->second;
+		}
+		else{
+			return Error;
+		}
 	}
 };
 
