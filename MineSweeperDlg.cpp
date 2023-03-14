@@ -5,6 +5,7 @@
 #include <thread>
 #include "Log.hpp"
 #include "Data.h"
+#include <string>
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -116,8 +117,13 @@ void CMineSweeperDlg::OnPaint()
 		ScreenToClient(&BombAreaRect);
 
 		CBitmap bit;
-		bit.LoadBitmapW(IDB_SMILE);
+		if (!m_Mine->GetIsWin())
+			bit.LoadBitmapW(IDB_SMILE);
+		else
+			bit.LoadBitmapW(IDB_WIN);
 		m_MainButton.SetBitmap(bit);
+		
+		GetDlgItem(IDC_MINECOUNT)->SetWindowTextW(std::to_wstring(m_Mine->GetMarked()).c_str());
 
 		CPaintDC dc(this);
 		CDC memDC;
@@ -138,20 +144,11 @@ void CMineSweeperDlg::OnPaint()
 				auto it = m_PicMap.find(Mine::BlockState(realState & 0xF));
 				if (it == m_PicMap.end()) {
 					realState = Mine::BlockState(realState & 0xE);
-					m_PicMap.find(realState);
+					it=m_PicMap.find(realState);
 				}
 
 				pOldBmp = memDC.SelectObject(it->second.get());
 
-
-				/*if ((m_Mine->GetBlockStateByPos(i, j) & 0x8F) == 0x8F) {
-					pOldBmp = memDC.SelectObject(&m_Flag);
-					Log("绘制 x:%d y:%d", i, j);
-				}*/
-				/*	else
-					{
-						pOldBmp = memDC.SelectObject(&m_UnusedBlock);
-					}*/
 				dc.BitBlt(x, y, Data::bitPicSize, Data::bitPicSize, &memDC, rect.left, rect.top, SRCCOPY);
 			}
 		}
@@ -256,7 +253,9 @@ void CMineSweeperDlg::OnSettingHard()
 
 BOOL CMineSweeperDlg::PreTranslateMessage(MSG* pMsg)
 {
-
+	if (m_Mine->GetIsWin()) {
+		return 1;
+	}
 	if (pMsg->message == WM_LBUTTONDOWN) {
 		if (pMsg->hwnd == GetDlgItem(IDC_BUTTON1)->m_hWnd) {
 			CBitmap bit;
@@ -331,15 +330,26 @@ void CMineSweeperDlg::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	auto [isGeted, pos] = m_Mine->GetBeClickedMine({ point.x,point.y });
 	if (isGeted) {
-		m_Mine->SetBlockStateByPos(pos, [](std::pair<const std::pair<int, int>, Mine::BlockState>& v1, const Mine::BlockState state) {
+		m_Mine->SetBlockStateByPos(pos, [&](std::pair<const std::pair<int, int>, Mine::BlockState>& v1, const Mine::BlockState state) {
 			if (v1.second - (v1.second & 0xE0) == Mine::BlockMarked) {
 				v1.second = (Mine::BlockState)(v1.second | Mine::BlockBeInited);
+				m_Mine->SubMarked();
 			}
 			else{
 				v1.second = (Mine::BlockState)((v1.second & 0xE0) | Mine::BlockMarked);
+				m_Mine->AddMarked();
 			}
 			
 		});
+	}
+	if (m_Mine->GetIsWin()) {
+		std::thread t([&]() {
+			::MessageBoxA(nullptr, "恭喜你 您获胜了！", "Win!", MB_OK);
+			m_Mine = std::make_unique<Mine>(m_Mine->GetMaxX(), m_Mine->GetMaxY(), m_Mine->GetMaxCount());
+			Invalidate();
+			UpdateWindow();
+		});
+		t.detach();
 	}
 	Invalidate();
 	UpdateWindow();

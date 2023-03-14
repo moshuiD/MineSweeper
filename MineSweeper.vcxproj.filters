@@ -83,5 +83,8 @@
     <Image Include="res\UsedBlock.bmp">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="res\Win.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

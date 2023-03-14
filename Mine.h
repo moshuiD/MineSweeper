@@ -12,8 +12,6 @@
 class Mine
 {
 private:
-
-
 	void SetMine();
 
 public:
@@ -32,7 +30,7 @@ public:
 		BlockBeInited = 0x0F,
 		BlockNoMine = 0x40,
 		BlockHaveMine = 0x8F,
-		BlockMarkedMine = 0x8E,  
+		BlockMarkedMine = 0x8E,
 
 		BlockMarked = 0x0E,     //org&0xE0 and | this
 
@@ -62,11 +60,38 @@ private:
 	MineDisplayMap m_DisplayMineMap;
 	mutable std::mutex m_DisplayMineMapMutex;
 	mutable std::mutex m_MineMapMutex;
+	int m_Marked = m_MineCount;
+	mutable bool m_isWin = false;
+	INLINE void CheckWin() const
+	{
+		int mineCount = 0;
+		std::lock_guard lock(m_MineMapMutex);
+		for (const auto& [Pos, State] : m_MineMap)
+		{
+			if (State == BlockHaveMine)
+				return;
+			if (State == BlockMarkedMine)
+				mineCount++;
+			if (State == BlockMarked)
+				return;
+		}
+		if (mineCount == m_MineCount) {
+			m_isWin = true;
+			return;
+		}
+		else
+			return;
+	};
 public:
 	INLINE int GetMaxX() const { return m_MaxX; };
 	INLINE int GetMaxY() const { return m_MaxY; };
 	INLINE int GetMaxCount() const { return m_MineCount; };
 
+	INLINE int GetMarked() const { return m_Marked; };
+	INLINE void SubMarked() { m_Marked++; };
+	INLINE void AddMarked() { m_Marked--; };
+
+	INLINE bool GetIsWin() const { CheckWin(); return m_isWin; }
 	pair<bool, MinePos> GetBeClickedMine(const pair<int, int>& clickPoint) const;
 	INLINE void AddDisplayMineMap(pair<int, int>& drawPos, MinePos& minePos)
 	{
@@ -103,7 +128,7 @@ public:
 	}
 
 
-	INLINE	bool SetBlockStateByPos(const pair<int, int>& pos, BlockState state) 
+	INLINE	bool SetBlockStateByPos(const pair<int, int>& pos, BlockState state)
 	{
 		std::lock_guard lock(m_MineMapMutex);
 		auto it = m_MineMap.find(pos);
@@ -117,7 +142,7 @@ public:
 	}
 
 	template<class _Fn>
-	INLINE bool SetBlockStateByPos(const pair<int, int>& pos, _Fn func) 
+	INLINE bool SetBlockStateByPos(const pair<int, int>& pos, _Fn func)
 	{
 		std::lock_guard lock(m_MineMapMutex);
 		auto it = m_MineMap.find(pos);

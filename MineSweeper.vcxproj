@@ -215,6 +215,7 @@
     <Image Include="res\pressSmile.bmp" />
     <Image Include="res\smile.bmp" />
     <Image Include="res\UsedBlock.bmp" />
+    <Image Include="res\Win.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
