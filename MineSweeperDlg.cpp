@@ -19,7 +19,7 @@ CMineSweeperDlg::CMineSweeperDlg(CWnd* pParent /*=nullptr*/)
 	FILE* f;
 	freopen_s(&f, "CONOUT$", "w", stdout);
 #endif
-	m_Mine = std::make_unique<Mine>(9, 9, 10);
+	
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	SetPicMap();
 	std::thread t([this] {UpdateThread(); });
@@ -56,7 +56,7 @@ END_MESSAGE_MAP()
 BOOL CMineSweeperDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-
+	m_Mine = std::make_unique<Mine>(9, 9, 10, GetDlgItem(IDC_DISPLAYTIME)->m_hWnd);
 	//CMenu* pSysMenu = GetSystemMenu(FALSE);
 	//if (pSysMenu != nullptr)
 	//{
@@ -223,7 +223,7 @@ void CMineSweeperDlg::OnSettingCustom()
 
 void CMineSweeperDlg::OnSettingEasy()
 {
-	m_Mine = std::make_unique<Mine>(9, 9, 10);
+	m_Mine = std::make_unique<Mine>(9, 9, 10,GetDlgItem(IDC_DISPLAYTIME)->m_hWnd);
 	Invalidate();
 	UpdateWindow();
 
@@ -233,7 +233,7 @@ void CMineSweeperDlg::OnSettingEasy()
 
 void CMineSweeperDlg::OnSettingMid()
 {
-	m_Mine = std::make_unique<Mine>(16, 16, 40);
+	m_Mine = std::make_unique<Mine>(16, 16, 40, GetDlgItem(IDC_DISPLAYTIME)->m_hWnd);
 	Invalidate();
 	UpdateWindow();
 
@@ -243,7 +243,7 @@ void CMineSweeperDlg::OnSettingMid()
 
 void CMineSweeperDlg::OnSettingHard()
 {
-	m_Mine = std::make_unique<Mine>(32, 16, 99);
+	m_Mine = std::make_unique<Mine>(32, 16, 99, GetDlgItem(IDC_DISPLAYTIME)->m_hWnd);
 	Invalidate();
 	UpdateWindow();
 
@@ -275,7 +275,7 @@ BOOL CMineSweeperDlg::PreTranslateMessage(MSG* pMsg)
 			x = m_Mine->GetMaxX();
 			y = m_Mine->GetMaxY();
 			count = m_Mine->GetMaxCount();
-			m_Mine = std::make_unique<Mine>(x, y, count);
+			m_Mine = std::make_unique<Mine>(x, y, count, GetDlgItem(IDC_DISPLAYTIME)->m_hWnd);
 			Invalidate();
 			UpdateWindow();
 		}
@@ -345,7 +345,7 @@ void CMineSweeperDlg::OnRButtonDown(UINT nFlags, CPoint point)
 	if (m_Mine->GetIsWin()) {
 		std::thread t([&]() {
 			::MessageBoxA(nullptr, "恭喜你 您获胜了！", "Win!", MB_OK);
-			m_Mine = std::make_unique<Mine>(m_Mine->GetMaxX(), m_Mine->GetMaxY(), m_Mine->GetMaxCount());
+			m_Mine = std::make_unique<Mine>(m_Mine->GetMaxX(), m_Mine->GetMaxY(), m_Mine->GetMaxCount(), GetDlgItem(IDC_DISPLAYTIME)->m_hWnd);
 			Invalidate();
 			UpdateWindow();
 		});

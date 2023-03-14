@@ -3,13 +3,17 @@
 #include <map>
 #include "Log.hpp"
 #include <future>
+#include "Timer.hpp"
 #ifdef _DEBUG
 #define INLINE inline
 #else
 #define INLINE __forceinline
 #endif 
 
-class Mine
+
+
+
+class Mine : private Timer
 {
 private:
 	void SetMine();
@@ -42,12 +46,20 @@ public:
 	using MineMap = std::map<MinePos, BlockState>;
 	using MineDisplayMap = std::map<pair<int, int>, MinePos>;
 
-
-	explicit Mine(int maxX, int maxY, int mineCount) :
-		m_MaxX(maxX), m_MaxY(maxY), m_MineCount(mineCount)
+	
+	explicit Mine(int maxX, int maxY, int mineCount, HWND timeShower) :
+		m_MaxX(maxX), m_MaxY(maxY), m_MineCount(mineCount), m_TimeShower(timeShower),
+		Timer(1000, [&]() {
+			static int i = 0;
+			i++;
+			char szBuff[1024];
+			sprintf_s(szBuff, 1024, "%d", i);
+			SetWindowTextA(m_TimeShower, szBuff);
+		})
 	{
 		Log("Mine被实例化一次");
 		SetMine();
+		
 	};
 	~Mine();
 
@@ -56,12 +68,14 @@ private:
 	const int m_MaxX;
 	const int m_MaxY;
 	const int m_MineCount;
+	const HWND m_TimeShower;
 	MineMap m_MineMap;
 	MineDisplayMap m_DisplayMineMap;
 	mutable std::mutex m_DisplayMineMapMutex;
 	mutable std::mutex m_MineMapMutex;
 	int m_Marked = m_MineCount;
 	mutable bool m_isWin = false;
+	mutable bool m_FirstStart = true;
 	INLINE void CheckWin() const
 	{
 		int mineCount = 0;
@@ -91,7 +105,13 @@ public:
 	INLINE void SubMarked() { m_Marked++; };
 	INLINE void AddMarked() { m_Marked--; };
 
-	INLINE bool GetIsWin() const { CheckWin(); return m_isWin; }
+	INLINE bool GetIsWin() const 
+	{ 
+		CheckWin(); 
+		if (m_isWin)
+			Timer::Stop();
+		return m_isWin; 
+	}
 	pair<bool, MinePos> GetBeClickedMine(const pair<int, int>& clickPoint) const;
 	INLINE void AddDisplayMineMap(pair<int, int>& drawPos, MinePos& minePos)
 	{

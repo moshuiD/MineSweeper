@@ -46,6 +46,10 @@ Mine::pair<bool, Mine::MinePos> Mine::GetBeClickedMine(const pair<int, int>& cli
 	});
 	lock.unlock();
 	if (iter != m_DisplayMineMap.end()) {
+		if (m_FirstStart) {
+			m_FirstStart = !m_FirstStart;
+			Timer::Start();
+		}
 		return { true,iter->second };
 	}
 	else{
