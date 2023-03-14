@@ -32,7 +32,9 @@ public:
 		BlockBeInited = 0x0F,
 		BlockNoMine = 0x40,
 		BlockHaveMine = 0x8F,
-		BlockMarkMine = 0x0E,     //org&0xE0 and | this
+		BlockMarkedMine = 0x8E,  
+
+		BlockMarked = 0x0E,     //org&0xE0 and | this
 
 		Error = 0xFF,
 	};
@@ -88,15 +90,43 @@ public:
 		std::lock_guard lock(m_MineMapMutex);
 		auto it = std::find_if(m_MineMap.begin(), m_MineMap.end(), [&](const std::pair<std::pair<int, int>, Mine::BlockState>& v) {
 			if (v.first.first == x && v.first.second == y)
-				return true;
+			return true;
 			else
 				return false;
-		});
+			});
 		if (it != m_MineMap.end()) {
 			return it->second;
 		}
-		else{
+		else {
 			return Error;
+		}
+	}
+
+
+	INLINE	bool SetBlockStateByPos(const pair<int, int>& pos, BlockState state) 
+	{
+		std::lock_guard lock(m_MineMapMutex);
+		auto it = m_MineMap.find(pos);
+		if (it != m_MineMap.end()) {
+			(*it).second = state;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	template<class _Fn>
+	INLINE bool SetBlockStateByPos(const pair<int, int>& pos, _Fn func) 
+	{
+		std::lock_guard lock(m_MineMapMutex);
+		auto it = m_MineMap.find(pos);
+		if (it != m_MineMap.end()) {
+			func(*it, (*it).second);
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
 };

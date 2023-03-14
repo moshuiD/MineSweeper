@@ -12,6 +12,8 @@
 #define IDB_CLICKBLOCK                  142
 #define IDB_BITMAP1                     143
 #define IDB_MARKED                      143
+#define IDB_BITMAP2                     144
+#define IDB_USEDBLOCK                   144
 #define IDC_BOMBAREA                    1002
 #define IDC_HEADER                      1004
 #define IDC_MINECOUNT                   1005
@@ -26,7 +28,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        144
+#define _APS_NEXT_RESOURCE_VALUE        145
 #define _APS_NEXT_COMMAND_VALUE         32782
 #define _APS_NEXT_CONTROL_VALUE         1008
 #define _APS_NEXT_SYMED_VALUE           101

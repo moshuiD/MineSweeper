@@ -214,6 +214,7 @@
     <Image Include="res\MineSweeper.ico" />
     <Image Include="res\pressSmile.bmp" />
     <Image Include="res\smile.bmp" />
+    <Image Include="res\UsedBlock.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

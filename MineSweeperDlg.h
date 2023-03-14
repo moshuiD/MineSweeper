@@ -1,13 +1,14 @@
 ﻿#pragma once
 #include <memory>
 #include "Mine.h"
-
+#include <map>
 class CMineSweeperDlg : public CDialogEx
 {
 	template<class T>
 	using shared_ptr = std::shared_ptr<T>;
 	template<class T>
 	using unique_ptr = std::unique_ptr<T>;
+	using PicMap = std::map<Mine::BlockState,shared_ptr<CBitmap>>;
 	// 构造
 public:
 	CMineSweeperDlg(CWnd* pParent = nullptr);	// 标准构造函数
@@ -24,10 +25,7 @@ protected:
 	// 实现
 protected:
 	HICON m_hIcon;
-	CBitmap m_UnusedBlock;
-	CBitmap m_UsedBlock;
-	CBitmap m_Bomber;
-	CBitmap m_Flag;
+
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
@@ -46,7 +44,9 @@ public:
 	afx_msg void OnSettingMid();
 private:
 	CButton m_MainButton;
+	PicMap m_PicMap;
 	BOOL PreTranslateMessage(MSG* pMsg);
+	void SetPicMap();
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);

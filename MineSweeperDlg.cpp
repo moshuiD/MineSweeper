@@ -18,17 +18,16 @@ CMineSweeperDlg::CMineSweeperDlg(CWnd* pParent /*=nullptr*/)
 	FILE* f;
 	freopen_s(&f, "CONOUT$", "w", stdout);
 #endif
-	m_Mine = unique_ptr<Mine>(new Mine(9, 9, 10));
+	m_Mine = std::make_unique<Mine>(9, 9, 10);
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	m_UnusedBlock.LoadBitmapW(IDB_BLOCK1);
-	m_Flag.LoadBitmapW(IDB_MARKED);
+	SetPicMap();
 	std::thread t([this] {UpdateThread(); });
 	t.detach();
 }
 
 CMineSweeperDlg::~CMineSweeperDlg()
 {
-	m_UnusedBlock.DeleteObject();
+
 }
 
 void CMineSweeperDlg::DoDataExchange(CDataExchange* pDX)
@@ -92,7 +91,7 @@ void CMineSweeperDlg::OnPaint()
 	Log("绘制一次");
 	if (IsIconic())
 	{
-		
+
 		CPaintDC dc(this); // 用于绘制的设备上下文
 
 		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
@@ -124,7 +123,7 @@ void CMineSweeperDlg::OnPaint()
 		CDC memDC;
 
 		memDC.CreateCompatibleDC(&dc);
-		CBitmap* pOldBmp = memDC.SelectObject(&m_UnusedBlock);
+		CBitmap* pOldBmp = memDC.SelectObject(m_PicMap.find(Mine::BlockBeInited)->second.get());
 
 		CRect rect(0, 0, Data::bitPicSize, Data::bitPicSize);
 		for (int i = 0; i < m_Mine->GetMaxX(); i++)
@@ -134,21 +133,32 @@ void CMineSweeperDlg::OnPaint()
 				int x = BombAreaRect.left + 2 + i * Data::bitPicSize;
 				int y = BombAreaRect.top + 2 + j * Data::bitPicSize;
 				m_Mine->AddDisplayMineMap(std::make_pair(x, y), std::make_pair(i, j));
-				if ((m_Mine->GetBlockStateByPos(i, j) & 0x8F) == 0x8F) {
+				auto realState = m_Mine->GetBlockStateByPos(i, j);
+
+				auto it = m_PicMap.find(Mine::BlockState(realState & 0xF));
+				if (it == m_PicMap.end()) {
+					realState = Mine::BlockState(realState & 0xE);
+					m_PicMap.find(realState);
+				}
+
+				pOldBmp = memDC.SelectObject(it->second.get());
+
+
+				/*if ((m_Mine->GetBlockStateByPos(i, j) & 0x8F) == 0x8F) {
 					pOldBmp = memDC.SelectObject(&m_Flag);
 					Log("绘制 x:%d y:%d", i, j);
-				}
-				else
-				{
-					pOldBmp = memDC.SelectObject(&m_UnusedBlock);
-				}
+				}*/
+				/*	else
+					{
+						pOldBmp = memDC.SelectObject(&m_UnusedBlock);
+					}*/
 				dc.BitBlt(x, y, Data::bitPicSize, Data::bitPicSize, &memDC, rect.left, rect.top, SRCCOPY);
 			}
 		}
 
 		memDC.SelectObject(pOldBmp); // 恢复先前选择的对象
 		memDC.DeleteDC(); // 删除内存设备上下文
-		
+
 		CDialogEx::OnPaint();
 	}
 }
@@ -209,8 +219,6 @@ void CMineSweeperDlg::AutoChangeControlSize()
 	displayTime->MoveWindow(clientRect.right - displayWidth - 10 /*margin*/, displayTimeArea.top, displayWidth, displayTimeArea.bottom - displayTimeArea.top);
 }
 
-
-
 void CMineSweeperDlg::OnSettingCustom()
 {
 
@@ -218,21 +226,30 @@ void CMineSweeperDlg::OnSettingCustom()
 
 void CMineSweeperDlg::OnSettingEasy()
 {
-	m_Mine = unique_ptr<Mine>(new Mine(9, 9, 10));
+	m_Mine = std::make_unique<Mine>(9, 9, 10);
+	Invalidate();
+	UpdateWindow();
+
 	GetDlgItem(IDC_MINECOUNT)->SetWindowTextW(L"10");
 	SendMessage(WM_PAINT);
 }
 
 void CMineSweeperDlg::OnSettingMid()
 {
-	m_Mine = unique_ptr<Mine>(new Mine(16, 16, 40));
+	m_Mine = std::make_unique<Mine>(16, 16, 40);
+	Invalidate();
+	UpdateWindow();
+
 	GetDlgItem(IDC_MINECOUNT)->SetWindowTextW(L"40");
 	SendMessage(WM_PAINT);
 }
 
 void CMineSweeperDlg::OnSettingHard()
 {
-	m_Mine = unique_ptr<Mine>(new Mine(32, 16, 99));
+	m_Mine = std::make_unique<Mine>(32, 16, 99);
+	Invalidate();
+	UpdateWindow();
+
 	GetDlgItem(IDC_MINECOUNT)->SetWindowTextW(L"99");
 	SendMessage(WM_PAINT);
 }
@@ -259,10 +276,30 @@ BOOL CMineSweeperDlg::PreTranslateMessage(MSG* pMsg)
 			x = m_Mine->GetMaxX();
 			y = m_Mine->GetMaxY();
 			count = m_Mine->GetMaxCount();
-			m_Mine = unique_ptr<Mine>(new Mine(x, y, count));
+			m_Mine = std::make_unique<Mine>(x, y, count);
+			Invalidate();
+			UpdateWindow();
 		}
 	}
 	return CDialog::PreTranslateMessage(pMsg);
+}
+
+void CMineSweeperDlg::SetPicMap()
+{
+	auto blockInit = std::make_shared<CBitmap>();
+	blockInit->LoadBitmapW(IDB_BLOCK1);
+	m_PicMap.insert({ Mine::BlockBeInited,blockInit });
+
+	auto blockFlag = std::make_shared<CBitmap>();
+	blockFlag->LoadBitmapW(IDB_MARKED);
+	m_PicMap.insert({ Mine::BlockMarked,blockFlag });
+
+	/*auto blockUsed = std::make_shared<CBitmap>(new (CBitmap));
+	blockFlag->LoadBitmapW(IDB_USEDBLOCK);
+	m_PicMap.insert({ Mine::block,blockInit });*/
+
+
+
 }
 
 void CMineSweeperDlg::OnLButtonDown(UINT nFlags, CPoint point)
@@ -292,8 +329,21 @@ void CMineSweeperDlg::OnLButtonUp(UINT nFlags, CPoint point)
 
 void CMineSweeperDlg::OnRButtonDown(UINT nFlags, CPoint point)
 {
-
-
+	auto [isGeted, pos] = m_Mine->GetBeClickedMine({ point.x,point.y });
+	if (isGeted) {
+		m_Mine->SetBlockStateByPos(pos, [](std::pair<const std::pair<int, int>, Mine::BlockState>& v1, const Mine::BlockState state) {
+			if (v1.second - (v1.second & 0xE0) == Mine::BlockMarked) {
+				v1.second = (Mine::BlockState)(v1.second | Mine::BlockBeInited);
+			}
+			else{
+				v1.second = (Mine::BlockState)((v1.second & 0xE0) | Mine::BlockMarked);
+			}
+			
+		});
+	}
+	Invalidate();
+	UpdateWindow();
+	Log("左键一次 x:%d y:%d", pos.first, pos.second);
 	CDialogEx::OnRButtonDown(nFlags, point);
 }
 

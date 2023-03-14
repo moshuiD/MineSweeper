@@ -52,6 +52,3 @@ Mine::pair<bool, Mine::MinePos> Mine::GetBeClickedMine(const pair<int, int>& cli
 		return { false,{-1,-1} };
 	}
 }
-
-
-
