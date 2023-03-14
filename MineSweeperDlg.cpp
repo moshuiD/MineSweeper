@@ -92,6 +92,7 @@ void CMineSweeperDlg::OnPaint()
 	Log("绘制一次");
 	if (IsIconic())
 	{
+		
 		CPaintDC dc(this); // 用于绘制的设备上下文
 
 		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
@@ -114,14 +115,16 @@ void CMineSweeperDlg::OnPaint()
 		RECT BombAreaRect;
 		::GetWindowRect(::GetDlgItem(m_hWnd, IDC_BOMBAREA), &BombAreaRect);
 		ScreenToClient(&BombAreaRect);
+
 		CBitmap bit;
 		bit.LoadBitmapW(IDB_SMILE);
 		m_MainButton.SetBitmap(bit);
+
 		CPaintDC dc(this);
 		CDC memDC;
 
 		memDC.CreateCompatibleDC(&dc);
-		CBitmap* pOldBmp = memDC.SelectObject(&m_Flag);
+		CBitmap* pOldBmp = memDC.SelectObject(&m_UnusedBlock);
 
 		CRect rect(0, 0, Data::bitPicSize, Data::bitPicSize);
 		for (int i = 0; i < m_Mine->GetMaxX(); i++)
@@ -145,7 +148,7 @@ void CMineSweeperDlg::OnPaint()
 
 		memDC.SelectObject(pOldBmp); // 恢复先前选择的对象
 		memDC.DeleteDC(); // 删除内存设备上下文
-
+		
 		CDialogEx::OnPaint();
 	}
 }
@@ -163,7 +166,8 @@ void CMineSweeperDlg::UpdateThread()
 	while (true)
 	{
 		if (GetAsyncKeyState(VK_F2) & 1) {
-			SendMessage(WM_PAINT);
+			Invalidate();
+			UpdateWindow();
 		}
 		Sleep(1);
 	}
