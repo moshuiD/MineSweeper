@@ -48,7 +48,8 @@ private:
 	BOOL PreTranslateMessage(MSG* pMsg);
 	void SetPicMap();
 public:
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	
 };

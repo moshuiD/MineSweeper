@@ -14,7 +14,8 @@ class Mine: private Timer
 {
 private:
 	void SetMine();
-
+	void ChangeMine();
+	void HandleClickBlock(const std::pair<int, int>& pos);
 public:
 	enum GameState
 	{
@@ -35,7 +36,7 @@ public:
 		HaveSeven = 7,
 		HaveEight = 8,
 		HaveNine = 9,
-
+		//org&0xE0
 		BlockBeInited = 0x0F,
 		BlockNoMine = 0x40,
 		BlockHaveMine = 0x8F,
@@ -60,10 +61,8 @@ public:
 		SetWindowTextA(m_TimeShower, szBuff);
 		})
 	{
-		
 		Log("Mine被实例化一次");
 		SetMine();
-		
 	};
 	~Mine() noexcept;
 
@@ -79,10 +78,10 @@ private:
 	mutable std::mutex m_DisplayMineMapMutex;
 	mutable std::mutex m_MineMapMutex;
 	int m_Marked = m_MineCount;
-	mutable GameState m_GameState = BeInit;
+	GameState m_GameState = BeInit;
 	
 
-	INLINE void CheckWin() const
+	INLINE void CheckWin()
 	{
 		int mineCount = 0;
 		std::lock_guard lock(m_MineMapMutex);
@@ -102,6 +101,14 @@ private:
 		else
 			return;
 	};
+	INLINE GameState ReturnGameState()
+	{
+		if (m_GameState == BeInit) {
+			m_GameState = InGame;
+			Timer::Start();
+		}
+		return m_GameState;
+	};
 public:
 	INLINE int GetMaxX() const { return m_MaxX; };
 	INLINE int GetMaxY() const { return m_MaxY; };
@@ -113,8 +120,8 @@ public:
 
 	INLINE GameState GetGameState() 
 	{ 
-		CheckWin(); 
-		if (m_GameState==Win||m_GameState==Lose)
+		CheckWin();
+		if (m_GameState == Win || m_GameState == Lose)
 			Timer::Stop();
 		return m_GameState;
 	}
@@ -178,6 +185,25 @@ public:
 		}
 	}
 
-	//void 
+	INLINE GameState ResClickBlock(const pair<int, int>& pos) 
+	{
+		std::unique_lock lock(m_MineMapMutex,std::defer_lock);
+		lock.lock();
+		auto blockState = m_MineMap.find(pos)->second;
+		lock.unlock();
+
+		if (m_GameState == BeInit) {
+			if (blockState == BlockHaveMine) {
+				ChangeMine();
+				
+				return ReturnGameState();
+			}
+		}
+		if (blockState == BlockHaveMine) {
+			m_GameState = Lose;
+			return ReturnGameState();
+		}
+
+	} 
 };
 

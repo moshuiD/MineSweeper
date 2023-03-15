@@ -16,6 +16,7 @@ void Mine::SetMine()
 	{
 		int t_X = rand() % m_MaxX;
 		int t_Y = rand() % m_MaxY;
+		std::lock_guard lock(m_MineMapMutex);
 		if (m_MineMap[{t_X, t_Y}] != BlockHaveMine) {
 			m_MineMap[{t_X, t_Y}] = BlockHaveMine;
 			unUsedMine--;
@@ -24,6 +25,27 @@ void Mine::SetMine()
 	} while (unUsedMine);
 
 	Log("Mine初始化完成");
+}
+
+void Mine::ChangeMine()
+{
+	bool isSet = false;
+	do
+	{
+		int t_X = rand() % m_MaxX;
+		int t_Y = rand() % m_MaxY;
+		std::lock_guard lock(m_MineMapMutex);
+		if (m_MineMap[{t_X, t_Y}] != BlockHaveMine) {
+			m_MineMap[{t_X, t_Y}] = BlockHaveMine;
+			isSet=true;
+			Log("雷重设在 x:%d y:%d", t_X, t_Y);
+		}
+	} while (!isSet);
+}
+
+void Mine::HandleClickBlock(const std::pair<int, int>& pos)
+{
+
 }
 
 Mine::~Mine()
@@ -48,10 +70,6 @@ Mine::pair<bool, Mine::MinePos> Mine::GetBeClickedMine(const pair<int, int>& cli
 	});
 	lock.unlock();
 	if (iter != m_DisplayMineMap.end()) {
-		if (m_GameState==BeInit) {
-			m_GameState = InGame;
-			Timer::Start();
-		}
 		return { true,iter->second };
 	}
 	else{

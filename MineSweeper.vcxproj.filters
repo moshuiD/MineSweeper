@@ -89,5 +89,32 @@
     <Image Include="res\Win.bmp">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="res\detect1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\detect2.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\detect3.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\detect4.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\detect5.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\detect6.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\detect7.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\detect8.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\DiedBlock.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

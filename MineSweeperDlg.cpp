@@ -128,6 +128,9 @@ void CMineSweeperDlg::OnPaint()
 		case(Mine::Win):
 			bit.LoadBitmapW(IDB_WIN);
 			break;
+		case(Mine::Lose):
+			bit.LoadBitmapW(IDB_DIED);
+			break;
 		default:
 			break;
 		}
@@ -239,7 +242,6 @@ void CMineSweeperDlg::OnSettingEasy()
 	UpdateWindow();
 
 	GetDlgItem(IDC_MINECOUNT)->SetWindowTextW(L"10");
-	SendMessage(WM_PAINT);
 }
 
 void CMineSweeperDlg::OnSettingMid()
@@ -249,7 +251,6 @@ void CMineSweeperDlg::OnSettingMid()
 	UpdateWindow();
 
 	GetDlgItem(IDC_MINECOUNT)->SetWindowTextW(L"40");
-	SendMessage(WM_PAINT);
 }
 
 void CMineSweeperDlg::OnSettingHard()
@@ -259,13 +260,12 @@ void CMineSweeperDlg::OnSettingHard()
 	UpdateWindow();
 
 	GetDlgItem(IDC_MINECOUNT)->SetWindowTextW(L"99");
-	SendMessage(WM_PAINT);
 }
 
 BOOL CMineSweeperDlg::PreTranslateMessage(MSG* pMsg)
 {
 	auto gameState = m_Mine->GetGameState();
-	if (gameState==Mine::Lose||gameState==Mine::Win) {
+	if ((gameState!=Mine::InGame && gameState != Mine::BeInit)) {
 		return 1;
 	}
 	if (pMsg->message == WM_LBUTTONDOWN) {
@@ -309,7 +309,13 @@ void CMineSweeperDlg::SetPicMap()
 	blockUsed->LoadBitmapW(IDB_USEDBLOCK);
 	m_PicMap.insert({ Mine::BlockNoMine,blockUsed });
 
-
+	for (int i = 0; i < 8; i++)
+	{
+		auto blockNum = std::make_shared<CBitmap>();
+		blockNum->LoadBitmapW(IDB_SHOW1+i);
+		m_PicMap.insert({ Mine::BlockState(Mine::HaveOne + i),blockNum });
+	}
+	
 }
 
 void CMineSweeperDlg::OnLButtonDown(UINT nFlags, CPoint point)
@@ -331,7 +337,20 @@ void CMineSweeperDlg::OnLButtonUp(UINT nFlags, CPoint point)
 	bit.DeleteObject();
 
 	auto [isGeted, pos] = m_Mine->GetBeClickedMine({ point.x,point.y });
-
+	if(isGeted) {
+		auto gameState = m_Mine->ResClickBlock(pos);
+		if (gameState == Mine::Lose) {
+			std::thread t([&]() {
+				::MessageBoxA(nullptr, "您失败了！):", "Fail!", MB_OK);
+				m_Mine = std::make_unique<Mine>(m_Mine->GetMaxX(), m_Mine->GetMaxY(), m_Mine->GetMaxCount(), GetDlgItem(IDC_DISPLAYTIME)->m_hWnd);
+				Invalidate();
+				UpdateWindow();
+			});
+			t.detach();
+		}
+	}
+	Invalidate();
+	UpdateWindow();
 	Log("x:%d y:%d", pos.first, pos.second);
 	CDialogEx::OnLButtonUp(nFlags, point);
 }
