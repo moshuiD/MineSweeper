@@ -16,6 +16,7 @@ private:
 	void SetMine();
 	void ChangeMine();
 	void HandleClickBlock(const std::pair<int, int>& pos);
+	int GetNearMineNum(const std::pair<int, int>& pos);
 public:
 	enum GameState
 	{
@@ -187,21 +188,27 @@ public:
 
 	INLINE GameState ResClickBlock(const pair<int, int>& pos) 
 	{
-		std::unique_lock lock(m_MineMapMutex,std::defer_lock);
-		lock.lock();
-		auto blockState = m_MineMap.find(pos)->second;
-		lock.unlock();
+		
+		auto blockState = GetBlockStateByPos(pos.first, pos.second);
 
 		if (m_GameState == BeInit) {
 			if (blockState == BlockHaveMine) {
 				ChangeMine();
-				
+				HandleClickBlock(pos);
+				return ReturnGameState();
+			}
+			else {
+				HandleClickBlock(pos);
 				return ReturnGameState();
 			}
 		}
+		
 		if (blockState == BlockHaveMine) {
 			m_GameState = Lose;
 			return ReturnGameState();
+		}
+		else {
+			HandleClickBlock(pos);
 		}
 
 	} 

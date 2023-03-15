@@ -19,7 +19,7 @@ CMineSweeperDlg::CMineSweeperDlg(CWnd* pParent /*=nullptr*/)
 	FILE* f;
 	freopen_s(&f, "CONOUT$", "w", stdout);
 #endif
-	
+
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	SetPicMap();
 	std::thread t([this] {UpdateThread(); });
@@ -134,9 +134,9 @@ void CMineSweeperDlg::OnPaint()
 		default:
 			break;
 		}
-		
+
 		m_MainButton.SetBitmap(bit);
-		
+
 		GetDlgItem(IDC_MINECOUNT)->SetWindowTextW(std::to_wstring(m_Mine->GetMarked()).c_str());
 
 		CPaintDC dc(this);
@@ -155,10 +155,12 @@ void CMineSweeperDlg::OnPaint()
 				m_Mine->AddDisplayMineMap(std::make_pair(x, y), std::make_pair(i, j));
 				auto realState = m_Mine->GetBlockStateByPos(i, j);
 
-				auto it = m_PicMap.find(Mine::BlockState(realState & 0xF));
+				auto it = m_PicMap.find(realState);
 				if (it == m_PicMap.end()) {
-					realState = Mine::BlockState(realState & 0xE);
-					it=m_PicMap.find(realState);
+					it = m_PicMap.find(Mine::BlockState(realState & 0xF));
+				}
+				if (it == m_PicMap.end()) {
+					it = m_PicMap.find(Mine::BlockState(realState & 0xE));
 				}
 
 				pOldBmp = memDC.SelectObject(it->second.get());
@@ -237,7 +239,7 @@ void CMineSweeperDlg::OnSettingCustom()
 
 void CMineSweeperDlg::OnSettingEasy()
 {
-	m_Mine = std::make_unique<Mine>(9, 9, 10,GetDlgItem(IDC_DISPLAYTIME)->m_hWnd);
+	m_Mine = std::make_unique<Mine>(9, 9, 10, GetDlgItem(IDC_DISPLAYTIME)->m_hWnd);
 	Invalidate();
 	UpdateWindow();
 
@@ -265,7 +267,7 @@ void CMineSweeperDlg::OnSettingHard()
 BOOL CMineSweeperDlg::PreTranslateMessage(MSG* pMsg)
 {
 	auto gameState = m_Mine->GetGameState();
-	if ((gameState!=Mine::InGame && gameState != Mine::BeInit)) {
+	if ((gameState != Mine::InGame && gameState != Mine::BeInit)) {
 		return 1;
 	}
 	if (pMsg->message == WM_LBUTTONDOWN) {
@@ -312,10 +314,10 @@ void CMineSweeperDlg::SetPicMap()
 	for (int i = 0; i < 8; i++)
 	{
 		auto blockNum = std::make_shared<CBitmap>();
-		blockNum->LoadBitmapW(IDB_SHOW1+i);
+		blockNum->LoadBitmapW(IDB_SHOW1 + i);
 		m_PicMap.insert({ Mine::BlockState(Mine::HaveOne + i),blockNum });
 	}
-	
+
 }
 
 void CMineSweeperDlg::OnLButtonDown(UINT nFlags, CPoint point)
@@ -337,7 +339,7 @@ void CMineSweeperDlg::OnLButtonUp(UINT nFlags, CPoint point)
 	bit.DeleteObject();
 
 	auto [isGeted, pos] = m_Mine->GetBeClickedMine({ point.x,point.y });
-	if(isGeted) {
+	if (isGeted) {
 		auto gameState = m_Mine->ResClickBlock(pos);
 		if (gameState == Mine::Lose) {
 			std::thread t([&]() {
@@ -360,19 +362,25 @@ void CMineSweeperDlg::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	auto [isGeted, pos] = m_Mine->GetBeClickedMine({ point.x,point.y });
 	if (isGeted) {
-		m_Mine->SetBlockStateByPos(pos, [&](std::pair<const std::pair<int, int>, Mine::BlockState>& v1, const Mine::BlockState state) {
-			if (v1.second - (v1.second & 0xE0) == Mine::BlockMarked) {
-				v1.second = (Mine::BlockState)(v1.second | Mine::BlockBeInited);
-				m_Mine->SubMarked();
-			}
-			else{
-				v1.second = (Mine::BlockState)((v1.second & 0xE0) | Mine::BlockMarked);
-				m_Mine->AddMarked();
-			}
-			
-		});
+		auto blockState = m_Mine->GetBlockStateByPos(pos.first, pos.second);
+		blockState = (Mine::BlockState)(blockState - (blockState & 0xE0));
+		if (blockState == Mine::BlockBeInited || blockState == Mine::BlockMarked) {
+			m_Mine->SetBlockStateByPos(pos, [&](std::pair<const std::pair<int, int>, Mine::BlockState>& v1, const Mine::BlockState state) {
+				if (v1.second - (state & 0xE0) == Mine::BlockMarked) {
+					v1.second = (Mine::BlockState)(state | Mine::BlockBeInited);
+					m_Mine->SubMarked();
+				}
+				else {
+					v1.second = (Mine::BlockState)((state & 0xE0) | Mine::BlockMarked);
+					m_Mine->AddMarked();
+				}
+
+			});
+		}
+
 	}
-	if (m_Mine->GetGameState()==Mine::Win) {
+
+	if (m_Mine->GetGameState() == Mine::Win) {
 		std::thread t([&]() {
 			::MessageBoxA(nullptr, "恭喜你 您获胜了！", "Win!", MB_OK);
 			m_Mine = std::make_unique<Mine>(m_Mine->GetMaxX(), m_Mine->GetMaxY(), m_Mine->GetMaxCount(), GetDlgItem(IDC_DISPLAYTIME)->m_hWnd);

@@ -45,7 +45,40 @@ void Mine::ChangeMine()
 
 void Mine::HandleClickBlock(const std::pair<int, int>& pos)
 {
+	auto blockState = GetBlockStateByPos(pos.first, pos.second);
+	if (blockState - (blockState & 0xE0) == BlockMarked) {
+		return;
+	}
+	SetBlockStateByPos(pos, BlockNoMine);
+	auto nearNum = GetNearMineNum(pos);
+	if (nearNum == 0) {
 
+	}
+	else {
+		SetBlockStateByPos(pos, [&](std::pair<const Mine::MinePos, Mine::BlockState>& v, const Mine::BlockState state) {
+			v.second = (Mine::BlockState)(state | nearNum);
+		});
+	}
+	Log("位置: %d %d,周围有 %d 个地雷", pos.first, pos.second, nearNum);
+}
+
+int Mine::GetNearMineNum(const std::pair<int, int>& pos)
+{
+	int count = 0;
+	for (int i = -1; i <= 1; i++)
+	{
+		for (int j = -1; j <= 1; j++)
+		{
+			if (i == 0 && j == 0) continue;
+			auto state = GetBlockStateByPos(pos.first + i, pos.second + j);
+			if (state == BlockHaveMine || state == BlockMarkedMine)
+			{
+				count++;
+			}
+		}
+	}
+	return count;
+	
 }
 
 Mine::~Mine()
