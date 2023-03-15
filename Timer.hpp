@@ -7,48 +7,39 @@
 #else
 #define INLINE __forceinline
 #endif 
-class Timer
-{
-public:
 
-	Timer(int delay, std::function<void()> func) :
-		m_Delay(delay), m_Func(func)
-	{
-		std::thread t([this]() {
-			CoreThread();
-		});
-		t.detach();
-	};
-	virtual ~Timer() {};
-	INLINE void Start() const 
-	{
-		m_Started = true;
-	};
-	INLINE void Start() 
-	{
-		m_Started = true;
-	};
-	INLINE void Stop() const
-	{
-		m_Started = false;
-	};
-	INLINE void Stop() 
-	{
-		m_Started = false;
-	};
+class Timer {
+public:
+    Timer(int interval, std::function<void()> task)
+        : m_interval(interval), m_task(task) {};
+    virtual ~Timer() {};
+    void Start()
+    {
+        if (!m_isRunning) {
+            m_isRunning = true;
+            m_thread = std::thread(&Timer::loop, this);
+        }
+    }
+
+    void Stop()
+    {
+        if (m_isRunning) {
+            m_isRunning = false;
+            if (m_thread.joinable())
+                m_thread.join();
+        }
+    }
+
 private:
-	const int m_Delay;
-	const std::function<void()> m_Func;
-    mutable bool m_Started = false;
-	INLINE void CoreThread() 
-	{
-		while (true)
-		{
-			if (m_Started) {
-				m_Func();
-			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(m_Delay));
-		}
-		
-	};
+    int m_interval;
+    std::function<void()> m_task;
+    std::thread m_thread;
+    bool m_isRunning=false;
+
+    void loop() {
+        while (m_isRunning) {
+            m_task();
+            std::this_thread::sleep_for(std::chrono::milliseconds(m_interval));
+        }
+    }
 };

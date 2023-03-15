@@ -10,15 +10,20 @@
 #define INLINE __forceinline
 #endif 
 
-
-
-
-class Mine : private Timer
+class Mine: private Timer
 {
 private:
 	void SetMine();
 
 public:
+	enum GameState
+	{
+		BeInit,
+		InGame,
+		Win,
+		Lose,
+	};
+
 	enum BlockState
 	{
 		HaveOne = 1,
@@ -48,20 +53,19 @@ public:
 
 	
 	explicit Mine(int maxX, int maxY, int mineCount, HWND timeShower) :
-		m_MaxX(maxX), m_MaxY(maxY), m_MineCount(mineCount), m_TimeShower(timeShower),
-		Timer(1000, [&]() {
-			static int i = 0;
-			i++;
-			char szBuff[1024];
-			sprintf_s(szBuff, 1024, "%d", i);
-			SetWindowTextA(m_TimeShower, szBuff);
+		m_MaxX(maxX), m_MaxY(maxY), m_MineCount(mineCount), m_TimeShower(timeShower), Timer(1000, [&]() {
+		m_Time++;
+		char szBuff[1024];
+		sprintf_s(szBuff, 1024, "%d", m_Time);
+		SetWindowTextA(m_TimeShower, szBuff);
 		})
 	{
+		
 		Log("Mine被实例化一次");
 		SetMine();
 		
 	};
-	~Mine();
+	~Mine() noexcept;
 
 
 private:
@@ -69,13 +73,15 @@ private:
 	const int m_MaxY;
 	const int m_MineCount;
 	const HWND m_TimeShower;
+	int m_Time = 0;
 	MineMap m_MineMap;
 	MineDisplayMap m_DisplayMineMap;
 	mutable std::mutex m_DisplayMineMapMutex;
 	mutable std::mutex m_MineMapMutex;
 	int m_Marked = m_MineCount;
-	mutable bool m_isWin = false;
-	mutable bool m_FirstStart = true;
+	mutable GameState m_GameState = BeInit;
+	
+
 	INLINE void CheckWin() const
 	{
 		int mineCount = 0;
@@ -90,7 +96,7 @@ private:
 				return;
 		}
 		if (mineCount == m_MineCount) {
-			m_isWin = true;
+			m_GameState = Win;
 			return;
 		}
 		else
@@ -105,14 +111,14 @@ public:
 	INLINE void SubMarked() { m_Marked++; };
 	INLINE void AddMarked() { m_Marked--; };
 
-	INLINE bool GetIsWin() const 
+	INLINE GameState GetGameState() 
 	{ 
 		CheckWin(); 
-		if (m_isWin)
+		if (m_GameState==Win||m_GameState==Lose)
 			Timer::Stop();
-		return m_isWin; 
+		return m_GameState;
 	}
-	pair<bool, MinePos> GetBeClickedMine(const pair<int, int>& clickPoint) const;
+	pair<bool, MinePos> GetBeClickedMine(const pair<int, int>& clickPoint);
 	INLINE void AddDisplayMineMap(pair<int, int>& drawPos, MinePos& minePos)
 	{
 		std::lock_guard lock(m_DisplayMineMapMutex);
@@ -146,8 +152,6 @@ public:
 			return Error;
 		}
 	}
-
-
 	INLINE	bool SetBlockStateByPos(const pair<int, int>& pos, BlockState state)
 	{
 		std::lock_guard lock(m_MineMapMutex);
@@ -160,7 +164,6 @@ public:
 			return false;
 		}
 	}
-
 	template<class _Fn>
 	INLINE bool SetBlockStateByPos(const pair<int, int>& pos, _Fn func)
 	{
@@ -174,5 +177,7 @@ public:
 			return false;
 		}
 	}
+
+	//void 
 };
 

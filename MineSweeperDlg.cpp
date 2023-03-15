@@ -117,10 +117,21 @@ void CMineSweeperDlg::OnPaint()
 		ScreenToClient(&BombAreaRect);
 
 		CBitmap bit;
-		if (!m_Mine->GetIsWin())
+		switch (m_Mine->GetGameState())
+		{
+		case(Mine::BeInit):
 			bit.LoadBitmapW(IDB_SMILE);
-		else
+			break;
+		case(Mine::InGame):
+			bit.LoadBitmapW(IDB_SMILE);
+			break;
+		case(Mine::Win):
 			bit.LoadBitmapW(IDB_WIN);
+			break;
+		default:
+			break;
+		}
+		
 		m_MainButton.SetBitmap(bit);
 		
 		GetDlgItem(IDC_MINECOUNT)->SetWindowTextW(std::to_wstring(m_Mine->GetMarked()).c_str());
@@ -253,7 +264,8 @@ void CMineSweeperDlg::OnSettingHard()
 
 BOOL CMineSweeperDlg::PreTranslateMessage(MSG* pMsg)
 {
-	if (m_Mine->GetIsWin()) {
+	auto gameState = m_Mine->GetGameState();
+	if (gameState==Mine::Lose||gameState==Mine::Win) {
 		return 1;
 	}
 	if (pMsg->message == WM_LBUTTONDOWN) {
@@ -293,10 +305,9 @@ void CMineSweeperDlg::SetPicMap()
 	blockFlag->LoadBitmapW(IDB_MARKED);
 	m_PicMap.insert({ Mine::BlockMarked,blockFlag });
 
-	/*auto blockUsed = std::make_shared<CBitmap>(new (CBitmap));
-	blockFlag->LoadBitmapW(IDB_USEDBLOCK);
-	m_PicMap.insert({ Mine::block,blockInit });*/
-
+	auto blockUsed = std::make_shared<CBitmap>();
+	blockUsed->LoadBitmapW(IDB_USEDBLOCK);
+	m_PicMap.insert({ Mine::BlockNoMine,blockUsed });
 
 
 }
@@ -342,7 +353,7 @@ void CMineSweeperDlg::OnRButtonDown(UINT nFlags, CPoint point)
 			
 		});
 	}
-	if (m_Mine->GetIsWin()) {
+	if (m_Mine->GetGameState()==Mine::Win) {
 		std::thread t([&]() {
 			::MessageBoxA(nullptr, "恭喜你 您获胜了！", "Win!", MB_OK);
 			m_Mine = std::make_unique<Mine>(m_Mine->GetMaxX(), m_Mine->GetMaxY(), m_Mine->GetMaxCount(), GetDlgItem(IDC_DISPLAYTIME)->m_hWnd);

@@ -28,10 +28,12 @@ void Mine::SetMine()
 
 Mine::~Mine()
 {
+	Timer::Stop();
+	SetWindowTextA(m_TimeShower, "000");
 	Log("Mine被释放一次");
 }
 
-Mine::pair<bool, Mine::MinePos> Mine::GetBeClickedMine(const pair<int, int>& clickPoint) const
+Mine::pair<bool, Mine::MinePos> Mine::GetBeClickedMine(const pair<int, int>& clickPoint)
 {
 	using Data::bitPicSize;
 	std::unique_lock lock(m_DisplayMineMapMutex,std::defer_lock);
@@ -46,8 +48,8 @@ Mine::pair<bool, Mine::MinePos> Mine::GetBeClickedMine(const pair<int, int>& cli
 	});
 	lock.unlock();
 	if (iter != m_DisplayMineMap.end()) {
-		if (m_FirstStart) {
-			m_FirstStart = !m_FirstStart;
+		if (m_GameState==BeInit) {
+			m_GameState = InGame;
 			Timer::Start();
 		}
 		return { true,iter->second };
