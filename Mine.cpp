@@ -60,11 +60,15 @@ void Mine::HandleClickBlock(const std::pair<int, int>& pos)
 
 		do {
 			auto& curPos = needChangeBlockList.front();
+
 			needChangeBlockList.pop();
 			processedBlockSet.insert(curPos);
+
 			SetBlockStateByPos(curPos, BlockNoMine);
-			for (int i = -1; i <= 1; i++) {
-				for (int j = -1; j <= 1; j++) {
+			for (int i = -1; i <= 1; i++) 
+			{
+				for (int j = -1; j <= 1; j++) 
+				{
 					if (i == 0 && j == 0) continue;
 					MinePos neighborPos = { curPos.first + i, curPos.second + j };
 					if (neighborPos.first < 0 || neighborPos.first > m_MaxX) continue;
@@ -87,7 +91,7 @@ void Mine::HandleClickBlock(const std::pair<int, int>& pos)
 	else {
 		SetBlockStateByPos(pos, [&](std::pair<const Mine::MinePos, Mine::BlockState>& v, const Mine::BlockState state) {
 			v.second = (Mine::BlockState)(state | nearNum);
-			});
+		});
 	}
 	Log("位置: %d %d,周围有 %d 个地雷", pos.first, pos.second, nearNum);
 }
@@ -129,8 +133,8 @@ Mine::pair<bool, Mine::MinePos> Mine::GetBeClickedMine(const pair<int, int>& cli
 				return true;
 			}
 		}
-	return  false;
-		});
+		return  false;
+	});
 	lock.unlock();
 	if (iter != m_DisplayMineMap.end()) {
 		return { true,iter->second };
