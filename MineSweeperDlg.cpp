@@ -154,7 +154,11 @@ void CMineSweeperDlg::OnPaint()
 				int y = BombAreaRect.top + 2 + j * Data::bitPicSize;
 				m_Mine->AddDisplayMineMap(std::make_pair(x, y), std::make_pair(i, j));
 				auto realState = m_Mine->GetBlockStateByPos(i, j);
-
+				if (m_Mine->GetGameState() != Mine::Lose) {
+					if (realState == Mine::BlockHaveMine) {
+						realState = Mine::BlockBeInited;
+					}
+				}
 				auto it = m_PicMap.find(realState);
 				if (it == m_PicMap.end()) {
 					it = m_PicMap.find(Mine::BlockState(realState & 0xF));
@@ -317,6 +321,15 @@ void CMineSweeperDlg::SetPicMap()
 		blockNum->LoadBitmapW(IDB_SHOW1 + i);
 		m_PicMap.insert({ Mine::BlockState(Mine::HaveOne + i),blockNum });
 	}
+
+	auto blockClickedMine = std::make_shared<CBitmap>();
+	blockClickedMine->LoadBitmapW(IDB_CLICKEDMINE);
+	m_PicMap.insert({ Mine::BlockClickedMine,blockClickedMine });
+	
+	auto blockMine = std::make_shared<CBitmap>();
+	blockMine->LoadBitmapW(IDB_MINE);
+	m_PicMap.insert({ Mine::BlockHaveMine, blockMine });
+
 
 }
 

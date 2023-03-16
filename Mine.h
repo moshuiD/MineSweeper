@@ -10,7 +10,7 @@
 #define INLINE __forceinline
 #endif 
 
-class Mine: private Timer
+class Mine : private Timer
 {
 private:
 	void SetMine();
@@ -45,6 +45,7 @@ public:
 
 		BlockMarked = 0x0E,     //org&0xE0 and | this
 
+		BlockClickedMine = 0x8C,
 		Error = 0xFF,
 	};
 	template<class Tx, class Ty>
@@ -53,20 +54,20 @@ public:
 	using MineMap = std::map<MinePos, BlockState>;
 	using MineDisplayMap = std::map<pair<int, int>, MinePos>;
 
-	
+
 	explicit Mine(int maxX, int maxY, int mineCount, HWND timeShower) :
 		m_MaxX(maxX), m_MaxY(maxY), m_MineCount(mineCount), m_TimeShower(timeShower), Timer(1000, [&]() {
-		m_Time++;
-		char szBuff[1024];
-		sprintf_s(szBuff, 1024, "%d", m_Time);
-		SetWindowTextA(m_TimeShower, szBuff);
+			m_Time++;
+			char szBuff[1024];
+			sprintf_s(szBuff, 1024, "%d", m_Time);
+			SetWindowTextA(m_TimeShower, szBuff);
 		})
 	{
 		Log("Mine被实例化一次");
 		SetMine();
 	};
-	~Mine() noexcept;
-
+			
+		~Mine() noexcept;
 
 private:
 	const int m_MaxX;
@@ -80,7 +81,7 @@ private:
 	mutable std::mutex m_MineMapMutex;
 	int m_Marked = m_MineCount;
 	GameState m_GameState = BeInit;
-	
+
 
 	INLINE void CheckWin()
 	{
@@ -119,8 +120,8 @@ public:
 	INLINE void SubMarked() { m_Marked++; };
 	INLINE void AddMarked() { m_Marked--; };
 
-	INLINE GameState GetGameState() 
-	{ 
+	INLINE GameState GetGameState()
+	{
 		CheckWin();
 		if (m_GameState == Win || m_GameState == Lose)
 			Timer::Stop();
@@ -149,10 +150,10 @@ public:
 		std::lock_guard lock(m_MineMapMutex);
 		auto it = std::find_if(m_MineMap.begin(), m_MineMap.end(), [&](const std::pair<std::pair<int, int>, Mine::BlockState>& v) {
 			if (v.first.first == x && v.first.second == y)
-				return true;
+			return true;
 			else
 				return false;
-		});
+			});
 
 		if (it != m_MineMap.end()) {
 			return it->second;
@@ -187,9 +188,9 @@ public:
 		}
 	}
 
-	INLINE GameState ResClickBlock(const pair<int, int>& pos) 
+	INLINE GameState ResClickBlock(const pair<int, int>& pos)
 	{
-		
+
 		auto blockState = GetBlockStateByPos(pos.first, pos.second);
 
 		if (m_GameState == BeInit) {
@@ -203,8 +204,9 @@ public:
 				return ReturnGameState();
 			}
 		}
-		
+
 		if (blockState == BlockHaveMine) {
+			SetBlockStateByPos(pos, BlockClickedMine);
 			m_GameState = Lose;
 			return ReturnGameState();
 		}
@@ -212,6 +214,6 @@ public:
 			HandleClickBlock(pos);
 		}
 
-	} 
+	}
 };
 

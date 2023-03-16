@@ -22,8 +22,9 @@
 #define IDB_SHOW6                       151
 #define IDB_SHOW7                       152
 #define IDB_SHOW8                       153
-#define IDB_BITMAP2                     154
 #define IDB_DIED                        154
+#define IDB_CLICKEDMINE                 157
+#define IDB_MINE                        158
 #define IDC_BOMBAREA                    1002
 #define IDC_HEADER                      1004
 #define IDC_MINECOUNT                   1005
@@ -38,7 +39,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        155
+#define _APS_NEXT_RESOURCE_VALUE        159
 #define _APS_NEXT_COMMAND_VALUE         32782
 #define _APS_NEXT_CONTROL_VALUE         1008
 #define _APS_NEXT_SYMED_VALUE           101

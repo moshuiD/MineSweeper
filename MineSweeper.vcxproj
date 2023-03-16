@@ -210,6 +210,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\block1.bmp" />
+    <Image Include="res\ClickedMine.bmp" />
     <Image Include="res\ClientBlock.bmp" />
     <Image Include="res\detect1.bmp" />
     <Image Include="res\detect2.bmp" />
@@ -221,6 +222,7 @@
     <Image Include="res\detect8.bmp" />
     <Image Include="res\DiedBlock.bmp" />
     <Image Include="res\marked.bmp" />
+    <Image Include="res\Mine.bmp" />
     <Image Include="res\MineSweeper.ico" />
     <Image Include="res\pressSmile.bmp" />
     <Image Include="res\smile.bmp" />
