@@ -50,42 +50,20 @@ BEGIN_MESSAGE_MAP(CMineSweeperDlg, CDialogEx)
 	ON_WM_LBUTTONUP()
 END_MESSAGE_MAP()
 
-
-// CMineSweeperDlg 消息处理程序
-
 BOOL CMineSweeperDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 	m_Mine = std::make_unique<Mine>(9, 9, 10, GetDlgItem(IDC_DISPLAYTIME)->m_hWnd);
-	//CMenu* pSysMenu = GetSystemMenu(FALSE);
-	//if (pSysMenu != nullptr)
-	//{
-	//	BOOL bNameValid;
-	//	CString strAboutMenu;
-	//	bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
-	//	ASSERT(bNameValid);
-	//	if (!strAboutMenu.IsEmpty())
-	//	{
-	//		pSysMenu->AppendMenu(MF_SEPARATOR);
-	//		//pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
-	//	}
-	//}
 
-	// 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
-	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
-	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
+	return TRUE;
 }
 
 void CMineSweeperDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	CDialogEx::OnSysCommand(nID, lParam);
 }
-
-// 如果向对话框添加最小化按钮，则需要下面的代码
-//  来绘制该图标。  对于使用文档/视图模型的 MFC 应用程序，
-//  这将由框架自动完成。
 
 void CMineSweeperDlg::OnPaint()
 {
@@ -173,15 +151,14 @@ void CMineSweeperDlg::OnPaint()
 			}
 		}
 
-		memDC.SelectObject(pOldBmp); // 恢复先前选择的对象
-		memDC.DeleteDC(); // 删除内存设备上下文
+		memDC.SelectObject(pOldBmp);
+		memDC.DeleteDC();
 
 		CDialogEx::OnPaint();
 	}
 }
 
-//当用户拖动最小化窗口时系统调用此函数取得光标
-//显示。
+
 HCURSOR CMineSweeperDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
@@ -238,7 +215,7 @@ void CMineSweeperDlg::AutoChangeControlSize()
 
 void CMineSweeperDlg::OnSettingCustom()
 {
-
+	MessageBox(L"Coming soon! ;D");
 }
 
 void CMineSweeperDlg::OnSettingEasy()
@@ -390,7 +367,6 @@ void CMineSweeperDlg::OnRButtonDown(UINT nFlags, CPoint point)
 
 			});
 		}
-
 	}
 
 	if (m_Mine->GetGameState() == Mine::Win) {
