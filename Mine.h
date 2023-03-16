@@ -149,10 +149,11 @@ public:
 		std::lock_guard lock(m_MineMapMutex);
 		auto it = std::find_if(m_MineMap.begin(), m_MineMap.end(), [&](const std::pair<std::pair<int, int>, Mine::BlockState>& v) {
 			if (v.first.first == x && v.first.second == y)
-			return true;
+				return true;
 			else
 				return false;
-			});
+		});
+
 		if (it != m_MineMap.end()) {
 			return it->second;
 		}
