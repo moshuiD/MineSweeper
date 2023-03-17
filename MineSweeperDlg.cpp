@@ -28,7 +28,6 @@ CMineSweeperDlg::CMineSweeperDlg(CWnd* pParent /*=nullptr*/)
 
 CMineSweeperDlg::~CMineSweeperDlg()
 {
-
 }
 
 void CMineSweeperDlg::DoDataExchange(CDataExchange* pDX)
@@ -70,7 +69,6 @@ void CMineSweeperDlg::OnPaint()
 	Log("绘制一次");
 	if (IsIconic())
 	{
-
 		CPaintDC dc(this); // 用于绘制的设备上下文
 
 		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
@@ -179,7 +177,6 @@ void CMineSweeperDlg::UpdateThread()
 
 void CMineSweeperDlg::AutoChangeControlSize()
 {
-
 	auto mineArea = GetDlgItem(IDC_BOMBAREA);
 	RECT mineAreaRect;
 	mineArea->GetWindowRect(&mineAreaRect);
@@ -306,13 +303,10 @@ void CMineSweeperDlg::SetPicMap()
 	auto blockMine = std::make_shared<CBitmap>();
 	blockMine->LoadBitmapW(IDB_MINE);
 	m_PicMap.insert({ Mine::BlockHaveMine, blockMine });
-
-
 }
 
 void CMineSweeperDlg::OnLButtonDown(UINT nFlags, CPoint point)
 {
-
 	CBitmap bit;
 	bit.LoadBitmapW(IDB_CLICKBLOCK);
 	m_MainButton.SetBitmap(bit);
@@ -322,7 +316,6 @@ void CMineSweeperDlg::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CMineSweeperDlg::OnLButtonUp(UINT nFlags, CPoint point)
 {
-
 	CBitmap bit;
 	bit.LoadBitmapW(IDB_SMILE);
 	m_MainButton.SetBitmap(bit);
@@ -364,7 +357,6 @@ void CMineSweeperDlg::OnRButtonDown(UINT nFlags, CPoint point)
 					v1.second = (Mine::BlockState)((state & 0xE0) | Mine::BlockMarked);
 					m_Mine->AddMarked();
 				}
-
 			});
 		}
 	}
