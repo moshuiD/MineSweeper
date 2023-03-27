@@ -25,8 +25,10 @@ public:
     {
         if (m_isRunning) {
             m_isRunning = false;
+            TerminateThread(m_thread.native_handle(), 0);
             if (m_thread.joinable())
-                m_thread.join();//bug
+                m_thread.join();
+
         }
     }
 
